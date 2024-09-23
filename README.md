@@ -58,7 +58,7 @@ options:
 Extract excited state properties from Gaussian09/16 output file and export them as a `.csv` file. 
 
 ### Dependencies
-* Python >=3.9
+* [Python](https://scikit-learn.org/stable/index.html) >=3.9
 
 ### Usage
 ```
@@ -80,7 +80,7 @@ options:
 Creates an input file from `.gro` configurations to perform ASEC calculations using Gaussian09/16.
 
 ### Dependencies
-* Python >=3.9
+* [Python](https://scikit-learn.org/stable/index.html) >=3.9
 
 ### Usage
 ```
