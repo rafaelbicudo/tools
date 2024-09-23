@@ -1,19 +1,19 @@
 # tools
 Collection of scripts for preparing, running and analyzing quantum chemistry simulations. Check the [tutorials](https://github.com/rafaelbicudo/tools/tree/main/tutorials) file for more information.
 
-### LR.py
+### fit_dihedral.py
 
 Performs a linear regression to determine Ryckaert-Bellemans torsional coefficients used in the parameterization of classical dihedral energies. The optimization uses quantum mechanical calculations of a rigid scan via Gaussian09/16 code, performs a cubic interpolation in the quantum data and fit the coefficients to reproduce the polynomial. 
 
-**_PS_**: As the [DICEtools](https://github.com/hmcezar/dicetools) package can only be installed via GitHub, the package path needs to be in the `$PATH` variable or the `LR.py` script should be in the same directory of DICEtools scripts.
+**_PS_**: As the [DICEtools](https://github.com/hmcezar/dicetools) package can only be installed via GitHub, the package path needs to be in the `$PATH` variable or the `fit_dihedral.py` script should be in the same directory of DICEtools scripts.
 
 ### Dependencies
-* Python >= 3.10
-* numpy
-* pandas
-* sklearn
-* scipy
-* matplotlib
+* [Python](https://scikit-learn.org/stable/index.html) >= 3.10
+* [numpy](https://numpy.org)
+* [pandas](https://pandas.pydata.org)
+* [sklearn](https://scikit-learn.org/stable/index.html)
+* [scipy](https://scipy.org)
+* [matplotlib](https://matplotlib.org)
 * [dicetools](https://github.com/hmcezar/dicetools)
 
 ### Usage
