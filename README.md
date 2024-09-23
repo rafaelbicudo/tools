@@ -120,7 +120,7 @@ options:
 Create Gaussian09/16 input files to run calculations according to the s-QM/MM method. Molecules from the quantum region are saturated according to the [H link-atom approach](https://doi.org/10.1002/anie.200802019).
 
 ### Dependencies
-* Python >=3.10
+* [Python](https://scikit-learn.org/stable/index.html) >=3.10
 
 ### Usage
 ```
