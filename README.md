@@ -1,5 +1,5 @@
 # tools
-Collection of scripts for preparing, running and analyzing quantum chemistry simulations.
+Collection of scripts for preparing, running and analyzing quantum chemistry simulations. Check the [tutorials](https://github.com/rafaelbicudo/tools/tree/main/tutorials) file for more information.
 
 ### LR.py
 
