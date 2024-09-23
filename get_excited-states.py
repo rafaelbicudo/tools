@@ -125,7 +125,7 @@ def main() -> None:
     
     parser.add_argument("-dir", help="Directory with Gaussian09/16 output files.")
     parser.add_argument("-log", "--logfile", help="Gaussian09/16 output file.", nargs="+", type=str)
-    parser.add_argument( "-csv", "--csvfile", help=".csv data file name", type=str, default="exc_data.csv")
+    parser.add_argument( "-csv", "--csvfile", help=".csv data file name. Default is \"exc_data.csv\".", type=str, default="exc_data.csv")
 
     args = parser.parse_args()
 
