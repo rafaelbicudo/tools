@@ -77,7 +77,7 @@ options:
 ```
 
 ## prep_asec.py
-Creates an input file from `.gro` configurations to perform ASEC calculations using Gaussian09/16.
+Creates an input file from `.gro` configurations to perform [ASEC](https://doi.org/10.1016/j.cplett.2007.02.012) calculations using Gaussian09/16.
 
 ### Dependencies
 * [Python](https://scikit-learn.org/stable/index.html) >=3.9
