@@ -1,6 +1,59 @@
 # tools
 Collection of scripts for preparing, running and analyzing quantum chemistry simulations.
 
+### LR.py
+
+Performs a linear regression to determine Ryckaert-Bellemans torsional coefficients used in the parameterization of classical dihedral energies. The optimization uses quantum mechanical calculations of a rigid scan via Gaussian09/16 code, performs a cubic interpolation in the quantum data and fit the coefficients to reproduce the polynomial. 
+
+**_PS_**: As the [DICEtools](https://github.com/hmcezar/dicetools) package can only be installed via GitHub, the package path needs to be in the `$PATH` variable or the `LR.py` script should be in the same directory of DICEtools scripts.
+
+### Dependencies
+* Python >= 3.10
+* numpy
+* pandas
+* sklearn
+* scipy
+* matplotlib
+* [dicetools](https://github.com/hmcezar/dicetools)
+
+### Usage
+```
+$ python fit_dihedral.py -h
+usage: fit_dihedral.py [-h] [--method METHOD] [--alpha ALPHA] [--weight WEIGHT] [--cutoff CUTOFF] [--remove-overlap] [--max-barrier MAX_BARRIER] [--fit-from-total]
+                       [--angles ANGLES [ANGLES ...]]
+                       gaussianlogfile xyzrotationsfile topfile txtfile dfrfile a1 a2 a3 a4 npoints
+
+Performs a linear regression to determine torsional dihedral coefficients.
+
+positional arguments:
+  gaussianlogfile       the gaussian log file.
+  xyzrotationsfile      file with all torsional scan configurations.
+  topfile               the topology file.
+  txtfile               DICE .txt file
+  dfrfile               DICE .dfr file
+  a1                    first atom defining the reference dihedral.
+  a2                    second atom defining the reference dihedral.
+  a3                    third atom defining the reference dihedral.
+  a4                    fourth atom defining the reference dihedral.
+  npoints               number of configurations during the scan.
+
+options:
+  -h, --help            show this help message and exit
+  --method METHOD, -m METHOD
+                        the method employed in the linear regression (least-square, ridge, lasso, lassocv).
+  --alpha ALPHA         the coefficient multiplying L1 penalty in Lasso linear regression. Default is 0.01.
+  --weight WEIGHT, -w WEIGHT
+                        the weight given to total energy minima points. Default is 1.
+  --cutoff CUTOFF, -c CUTOFF
+                        minimum atomic distance tolerated. Default is 0.5.
+  --remove-overlap, -r  remove the overlapping configurations.
+  --max-barrier MAX_BARRIER, -b MAX_BARRIER
+                        limit the torsional barriers to the provided value (in kcal/mol).
+  --fit-from-total, -t  fit the torsional angle using the total energy.
+  --angles ANGLES [ANGLES ...]
+                        all dihedrals (in degrees) to be used in the fit (include the max and min angles).
+```
+
 ## get_excited-states.py
 Extract excited state properties from Gaussian09/16 output file and export them as a `.csv` file. 
 

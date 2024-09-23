@@ -7,7 +7,7 @@
     [X] Fix the error when trying to run '-dir' in the cluster.
     [ ] Fix an issue of --test that creates a ".xyz" file if the a termination (e.g., .com) is not specified.
 
-    AUTHOR: Rafael Bicudo Ribeiro
+    AUTHOR: Rafael Bicudo Ribeiro (@rafaelbicudo)
     DATE: 08/2024
 """
 

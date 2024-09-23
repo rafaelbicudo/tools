@@ -3,7 +3,7 @@
 """Creates an input file from .gro configurations to perform
    ASEC calculations using Gaussian09/16.
     
-   Authors: Rafael Bicudo Ribeiro and Leandro Rezende Franco
+   Authors: Rafael Bicudo Ribeiro (@rafaelbicudo) and Leandro Rezende Franco
    DATE: 09/07/2024
 """
 

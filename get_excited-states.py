@@ -3,7 +3,7 @@
 """Extract excited state properties from Gaussian09/16 output file
    and export them as a .csv file.
 
-   AUTHOR: Rafael Bicudo Ribeiro
+   AUTHOR: Rafael Bicudo Ribeiro (@rafaelbicudo)
    DATE: 08/2024
 """
 
