@@ -2,6 +2,9 @@
 
 """Extract excited state properties from Gaussian09/16 output file
    and export them as a .csv file.
+
+   AUTHOR: Rafael Bicudo Ribeiro
+   DATE: 08/2024
 """
 
 import argparse

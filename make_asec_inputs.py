@@ -245,8 +245,22 @@ def write_asec_format(
     keywords: str,
     charge: int,
     spin_mult: int,
-    output: str = "asec_coords.txt"
+    output: str
 ) -> None:
+    """Write the file for running ASEC on Gaussian09/16.
+
+    Args:
+        itpfile (list[str]): .itp file name.
+        qm_atoms (list): list with QM atoms.
+        configs_dir (str): path to the directory with .gro configurations.
+        keywords (str): Gaussian keywords for the calculation.
+        charge (int): total charge of the system.
+        spin_mult (int): spin multiplicity of the system.
+        output (str, optional): name of the output file.
+
+    Returns:
+        A Gaussian09/16 input file.
+    """
 
     # Get the number of configurations
     n_configs = 0

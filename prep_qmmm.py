@@ -2,10 +2,13 @@
 
 """Create Gaussian09/16 input files to run calculations according to the s-QM/MM method.
 
-    [ ] Add an option to loop over a directory with several files.
-    [ ] Fix the wrong naming at the .chk file when looping over several files.
-    [ ] Fix the error when trying to run '-dir' in the cluster.
+    [X] Add an option to loop over a directory with several files.
+    [ ] Add a flag to save the .chk file.
+    [X] Fix the error when trying to run '-dir' in the cluster.
     [ ] Fix an issue of --test that creates a ".xyz" file if the a termination (e.g., .com) is not specified.
+
+    AUTHOR: Rafael Bicudo Ribeiro
+    DATE: 08/2024
 """
 
 
@@ -164,58 +167,6 @@ def read_itp_file(itpfile: str) -> dict:
             parse_file(f)
                 
     return data
-
-
-def fix_resnum(
-    grofile: str, 
-    itpfile: str
-) -> None:
-    """Add the residue number to account for equal molecules 
-       with different configurations. It was developed for the
-       aqueous-processable polymers.
-
-    Args:
-        grofile (str): .gro file name.
-        itpfile (str): .itp file name.
-
-    Returns:
-        An "updated_{grofile}" file with residues changed.
-    """
-
-    gro_data = read_gro_file(grofile)
-    itp_data = read_itp_file(itpfile[0])
-
-    # Get the number of atoms per residue from itpfile
-    n_atoms_per_mol = len(itp_data["atomcharge"])
-
-    # Get the number of molecules
-    n_mols = int(gro_data["n_atoms"]/n_atoms_per_mol)
-
-    # Create a list with updated residue numbers
-    new_resnum = []
-    for i in range(1, n_mols+1):
-        for j in range(n_atoms_per_mol):
-            new_resnum.append(i)
-
-    # Create a file with updated residue numbers
-    with open(f"updated_{grofile}", "w") as fout:
-        # Write the header
-        fout.write(gro_data["header"])
-
-        # Write the amount of atoms
-        fout.write(f"{gro_data['n_atoms']}\n")
-
-        # Write the atomic data
-        for i in range(len(gro_data["atomnum"])):
-            new_line = "{:>5}{:<5}{:>5}{:>5}{:>8.3f}{:>8.3f}{:>8.3f}\n".format(new_resnum[i], 
-                        gro_data["resname"][i], gro_data["atomname"][i],
-                        gro_data["atomnum"][i], gro_data["x_coord"][i],
-                        gro_data["y_coord"][i], gro_data["z_coord"][i])
-
-            fout.write(new_line)
-
-        # Write the box size
-        fout.write("   {}   {}   {}\n".format(gro_data['box_dim'][0], gro_data['box_dim'][1], gro_data['box_dim'][2]))
 
 
 def get_QM_atoms(
@@ -878,7 +829,6 @@ def main() -> None:
     parser.add_argument("--link_scale_factor", "-sf", help="link atom distance scale factor.", type=float, default=0.71)
     parser.add_argument("--n_neighbors", "-nn", help="number of closest neighbors to redistribute the charge.", type=int, default=3)
     parser.add_argument("--cutoff", "-cut", help="cutoff radius (in AA) to redistribute the charge.", type=float, default=0.0)
-    parser.add_argument("--fix_resnum", "-fr", help="fix the residue numbering (for polymatic example).", action="store_true")
     parser.add_argument("--keywords", "-k", help="Gaussian keywords for the calculation.", nargs="+", type=str, default=["B3LYP/6-31G(d,p) Charge"])
     parser.add_argument("--charge", "-c", help="total charge of the system.", type=int, default=0)
     parser.add_argument("--spin_multiplicity", "-ms", help="spin multiplicity of the system.", type=int, default=1)
@@ -908,14 +858,8 @@ def main() -> None:
                     print(f"{_text}")
                     print("#" * len(_text), "\n")
 
-                    # Hardcoded section to set residue numbers for the PQx8O-T polymatic example
-                    if args.fix_resnum:
-                        fix_resnum(file, args.itpfile)
-                        qm_atoms = get_QM_atoms(f"updated_{file}", args.atomnums, args.residues, args.resnums)
-
-                    else:
-                        # Get the .gro atom numbers of QM atoms
-                        qm_atoms = get_QM_atoms(os.path.join(args.configs_dir, file), args.atomnums, args.residues, args.resnums)
+                    # Get the .gro atom numbers of QM atoms
+                    qm_atoms = get_QM_atoms(os.path.join(args.configs_dir, file), args.atomnums, args.residues, args.resnums)
 
                     # Flatten the qm_atoms in case of nested lists
                     if any(isinstance(i, list) for i in qm_atoms):
@@ -957,14 +901,8 @@ def main() -> None:
             print(f"Could not access '{args.configs_dir}' directory.")
 
     else:
-        # Hardcoded section to set residue numbers for the PQx8O-T polymatic example
-        if args.fix_resnum:
-            fix_resnum(args.grofile, args.itpfile)
-            qm_atoms = get_QM_atoms(f"updated_{args.grofile}", args.atomnums, args.residues, args.resnums)
-
-        else:
-            # Get the .gro atom numbers of QM atoms
-            qm_atoms = get_QM_atoms(args.grofile, args.atomnums, args.residues, args.resnums)
+        # Get the .gro atom numbers of QM atoms
+        qm_atoms = get_QM_atoms(args.grofile, args.atomnums, args.residues, args.resnums)
 
         # Flatten the qm_atoms in case of nested lists
         if any(isinstance(i, list) for i in qm_atoms):
