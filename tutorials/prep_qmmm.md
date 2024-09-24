@@ -21,5 +21,5 @@ conf1_box1_000.gro conf1_box1_001.gro conf1_box1_002.gro conf1_box1_003.gro conf
 
 For example, the `conf1_box1_000.gro` is the following:
 
-![5olig.tga](5olig.tga)
+![5olig.pdf](5olig.pdf)
 
