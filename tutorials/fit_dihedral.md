@@ -4,6 +4,4 @@ This tutorial is dedicated to run the `fit_dihedral.py` script. Before following
 
 ## Ryckaert-Bellemans dihedral
 
-\[
-\frac{1}{2}
-\]
+$\frac{1}{2}$
