@@ -21,7 +21,7 @@ For example, the `conf1_box1_000.gro` is the following:
 
 The box has 5 oligomer chains (different colors) solvated in a mixture of ethanol (green points) and water (blue lines) molecules.  
 
-Suppose we want to consider the 4 central backbone units of the red oligomer (resid = 1) as the quantum region. To do so, we can identify the atom numbers as indexed in the `.gro` file or use the residues names and residue number/ID:
+Suppose we want to consider the 4 central backbone units of the red oligomer (resid 1 and residue names M4B, M5B, M6B and M7B) as the quantum region. To do so, we can identify the atom numbers as indexed in the `.gro` file or use the residues names and residue number/ID:
 
 ```
 $ python $tools/prep_qmmm.py ethanol.itp tip3p.itp ff_olig.itp -res M4B M5B M6B M7B -rn 1 -k "M06/cc-pVDZ Charge NoSymm TD(NStates=25) SCF(XQC)" -dir configs
