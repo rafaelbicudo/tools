@@ -17,7 +17,7 @@ conf1_box1_000.gro conf1_box1_001.gro conf1_box1_002.gro conf1_box1_003.gro conf
 
 For example, the `conf1_box1_000.gro` is the following:
 
-![5olig](5olig.png)
+![5olig](images/5olig.png)
 
 The box has 5 oligomer chains (different colors) solvated in a mixture of ethanol (green points) and water (blue lines) molecules.  
 
@@ -123,7 +123,7 @@ All atoms that were removed during the [H link-atom approach](https://doi.org/10
 
 To check the configuration one can set the `--test` flag to create a `.xyz` file with all partial charges described as Bismuth atoms (represented as points in the figure below):
 
-![gaussian](gaussian.png)
+![gaussian](images/gaussian.png)
 
 **_PS:_** When using the residue's name and number, be sure that residues are properly indexed before running the program. If not, use the atomic numbers to avoid problems. Additionally, also ensure that different atoms from same residue have different names in the `[ atoms ]` block from the topology file.
 
@@ -162,6 +162,6 @@ No partial charges when --test is set.
 
 For comparison, we can open the configuration on [VMD](https://www.ks.uiuc.edu/Research/vmd/minitutorials/tachyonao/) with the original box:
 
-![single_example](single_example.png)
+![single_example](images/single_example.png)
 
 All atoms from the original boxes are represented as points, while the quantum regions are vdW spheres and the classical embedding is shown as dynamical bonds. As the current version does not include periodic boundary conditions, one should ensure that there are enough classical atoms up to the desired radius cutoff. For example, one can run `gmx trjconv -f box.gro -s box.gro -o box_centered.gro -center` and choose a specific group to be centered.
