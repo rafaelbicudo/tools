@@ -1,6 +1,6 @@
 # Generating Gaussian input for QM/MM calculations
 
-This tutorial is dedicated to create Gaussian input files for QM/MM calculations with `prep_qmmm.py` script. The document is separated in two parts, for single and multiple files, respectively. 
+This tutorial is dedicated to create Gaussian input files for QM/MM calculations with `prep_qmmm.py` script. The document is separated in two parts, approaching single and multiple files with and without a cutoff for the embedding. 
 
 ## Multiple files with full box
 
@@ -160,8 +160,8 @@ Gaussian input file 'calc.xyz' sucessfully created.
 No partial charges when --test is set.
 ```
 
-For comparison, we can open the configuration on VMD with the original box:
+For comparison, we can open the configuration on [VMD](https://www.ks.uiuc.edu/Research/vmd/minitutorials/tachyonao/) with the original box:
 
 ![single_example](single_example.png)
 
-All atoms from the original boxes are represented as points, while the quantum regions are vdW spheres and the classical embedding is shown as dynamical bonds. 
+All atoms from the original boxes are represented as points, while the quantum regions are vdW spheres and the classical embedding is shown as dynamical bonds. As the current version does not include periodic boundary conditions, one should ensure that there are enough classical atoms up to the desired radius cutoff. For example, one can run `gmx trjconv -f box.gro -s box.gro -o box_centered.gro -center` and choose a specific group to be centered.
