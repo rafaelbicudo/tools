@@ -1,8 +1,8 @@
 # tools
 Collection of scripts for preparing, running and analyzing quantum chemistry simulations. Check the tutorials for more information:
 
-Tutorial 1: [Fitting proper torsional constants](https://rafaelbicudo.github.io/tools/tutorials/fit_dihedral.html)  
-Tutorial 2: [Generating Gaussian input for QM/MM calculations](https://rafaelbicudo.github.io/tools/tutorials/prep_qmmm.html)  
+Tutorial 1: [Fitting proper torsional constants](https://github.com/rafaelbicudo/tools/blob/main/tutorials/fit_dihedral.md)  
+Tutorial 2: [Generating Gaussian input for QM/MM calculations](https://github.com/rafaelbicudo/tools/blob/main/tutorials/prep_qmmm.md)  
 Tutorial 3: Generating Gaussian input for ASEC calculations  
 
 ## fit_dihedral.py
