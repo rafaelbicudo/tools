@@ -119,9 +119,9 @@ $ diff input_files/input_conf1_box1_001.com input_files/neutral_conf1_box1_001.c
 > -0.730	0.420	90.300	0.06407485914946584
 ```
 
-All atoms that were removed during the [H link-atom approach](https://doi.org/10.1002/anie.200802019) are indicated for each configuration, e.g., `[101, 657, 627, 118, 148, 543, 572, 230, 200, 269]` for `conf1_box1_001.gro`. The charge of the removed atoms are redistributed along the `-nn` closest neighbor point charges (which has 3 as default). 
+All atoms that were removed during the [H link-atom approach](https://doi.org/10.1002/anie.200802019) are indicated for each configuration, e.g., `[101, 657, 627, 118, 148, 543, 572, 230, 200, 269]` for `conf1_box1_001.gro`. The charge of the removed atoms are redistributed along the `-nn` closest neighbor point charges (which are 3 by default). 
 
-To check the configuration one can set the `--test` flag to create a `.xyz` file with all partial charges described as Bismuth atoms (represented as points in the figure below):
+To check the configuration one can set the `--test` flag to create a `.xyz` file with all partial charges described as bismuth atoms (represented as points in the figure below):
 
 ![gaussian](images/gaussian.png)
 
@@ -129,14 +129,14 @@ To check the configuration one can set the `--test` flag to create a `.xyz` file
 
 ## Single file with cutoff radius for partial charges
 
-For this part let's consider a box with 10 benzene, 500 water and 500 ethanol molecules. 
+For this part let's consider `box.gro`, a cubic box with 10 benzene, 500 water and 500 ethanol molecules. 
 
 ```
 $ ls
 benzene.itp box.gro     ethanol.itp    water.itp
 ```
 
-Instead of including all other atoms as point charges, we can set a cutoff radius using the `-ec` flag and redistribute the charge among the `-pr`% most distant atoms. 
+Instead of including all other atoms as point charges, we can set a cutoff radius using the `-ec` flag and redistribute the charge among the percentage of most distant atoms set by the flag `-pc` (values between 0.0 and 1.0). 
 
 ```
 $ python $tools/prep_qmmm.py benzene.itp water.itp ethanol.itp -res UNK -rn 1 2 -k "B3LYP/STO-3G Charge NoSymm" -gro box.gro -ec 10
@@ -149,7 +149,7 @@ Charge of -3.768300000000001 was redistributed over the 10.0% most distant point
 Total charge is 0.00000. No need for fixing numerical fluctuations.
 ```
 
-In this case the `-gro` flag indicates a single file, `-chk` includes the checkpoint line in the input file and `-ec 10` set the cutoff distance as 10 Angstrom. Since we didn't specify the `-pr` flag, the default value will equally redistribute the net charge over the 10% most distant atoms, which in this case, corresponds to around -0.0038 per atom. To visualize the system, we can run:
+In this case the `-gro` flag indicates the single file `box.gro`, `-chk` includes the checkpoint line in the input file and `-ec 10` set the cutoff distance as 10 Angstrom. Since we didn't specify the `-pr` flag, the default value will equally redistribute the net charge over the 10% most distant atoms, which in this case, corresponds to around -0.0038 per atom. To visualize the system, we can run:
 
 ```
 $ python $tools/prep_qmmm.py benzene.itp water.itp ethanol.itp -res UNK -rn 1 2 -k "B3LYP/STO-3G Charge NoSymm" -gro box.gro -ec 10 --test
