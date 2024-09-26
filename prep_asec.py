@@ -336,6 +336,8 @@ def write_asec_format(
             
             fout.write("\n")
 
+    # Print a final message
+    print(f"\nGaussian input file \'{output}\' was successfully created.")
 
 def parse_range(value: str):
     """Combine values from nested lists into a single list.

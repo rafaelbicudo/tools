@@ -778,7 +778,7 @@ def write_gaussian_input(
             print(f"Charge of {pc_charge} was redistributed over the {percentage_redist*100}% most distant point charges " \
               f"({round(len(point_charges) * percentage_redist)}) from the QM region.\n")
     else:
-        print(f"Gaussian input file '{output.split('.')[0]}.xyz' sucessfully created.\n")
+        print(f"Gaussian input file '{output.split('.')[0]}.xyz' successfully created.\n")
 
 
 def get_distant_charge(file: str) -> float | str:
