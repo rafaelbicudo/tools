@@ -1,7 +1,7 @@
 # tools
 Collection of scripts for preparing, running and analyzing quantum chemistry simulations. Check the [tutorials](https://github.com/rafaelbicudo/tools/tree/main/tutorials) file for more information.
 
-### fit_dihedral.py
+## fit_dihedral.py
 
 Performs a linear regression to determine Ryckaert-Bellemans torsional coefficients used in the parameterization of classical dihedral energies. The optimization uses quantum mechanical calculations of a rigid scan via Gaussian09/16 code, performs a cubic interpolation in the quantum data and fit the coefficients to reproduce the polynomial. 
 

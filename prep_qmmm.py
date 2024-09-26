@@ -3,9 +3,12 @@
 """Create Gaussian09/16 input files to run calculations according to the s-QM/MM method.
 
     [X] Add an option to loop over a directory with several files.
-    [ ] Add a flag to save the .chk file.
+    [X] Add a flag to save the .chk file.
     [X] Fix the error when trying to run '-dir' in the cluster.
     [ ] Fix an issue of --test that creates a ".xyz" file if the a termination (e.g., .com) is not specified.
+    [ ] Add an option to only consider partial charges up to a given cutoff radius.
+    [ ] Add a flag to renormalize the charges to neutralize the residues. >> This should actually be done previously.
+    [ ] Add a flag to consider complete molecules instead of breaking them.
 
     AUTHOR: Rafael Bicudo Ribeiro (@rafaelbicudo)
     DATE: 08/2024
@@ -231,28 +234,22 @@ def get_charge(
     Returns:
         charge (float): charge of "atom_name".
     """
-
+                
     # Get the data dictionary
     itp_data = read_itp_file(itpfile)
 
-    # Loop over all atom names
-    for i in range(len(itp_data["atomname"])):
-        # Check for matching itpAtomNumbers
-        if itp_data["atomnum"][i] == itpAtomNum:
+    # Extract lists for lookup
+    atomnums = itp_data.get("atomnum", [])
+    atomnames = itp_data.get("atomname", [])
+    resnames = itp_data.get("resname", [])
+    charges = itp_data.get("atomcharge", [])
 
-            # Check for matching atom names
-            if itp_data["atomname"][i] == atom_name:
+    # Loop through the data, unpacking the fields
+    for atomnum, atomname, resname, charge in zip(atomnums, atomnames, resnames, charges):
+        if atomnum == itpAtomNum and atomname == atom_name and resname == res_name:
+            return charge
 
-                # Check for matching residue names
-                if itp_data["resname"][i] == res_name:
-
-                    charge = itp_data["atomcharge"][i]
-                    # print(f"Charge of {charge} found in the {itpfile} topology file.")
-
-                    return charge
-    
-    # print(f"Couldn't find the atom in the {itpfile} topology file.")
-    # sys.exit()
+    return None
 
 
 def get_connectivity(
@@ -464,8 +461,9 @@ def get_charge_shifts(
         to_remove (list): list with atoms to be removed.
         n_neighbors (int): number of closest neighbors to redistribute the charge.
         cutoff (float): cutoff radius to redistribute the charge.
+
     Returns:
-        qm_charge_shift (float): charge shift per atom from the QM atoms.
+        qm_charge_shift (float): charge shift per point charge from the QM atoms.
         neigh_sums (list): list with neighbor atoms.
         neigh_charge_shifts (list): list with charges to be added to the neighbor atoms.
     """
@@ -539,6 +537,66 @@ def get_charge_shifts(
     return qm_charge_shift, neigh_nums, neigh_charge_shifts
 
 
+def cut_embedding(
+    gro_data: dict,
+    qm_atoms: list,
+    embedding_cutoff: float,
+) -> list:
+    """Get the distant partial charges to be removed.
+
+    Args:
+        gro_data (dict): .gro data dictionary.
+        embedding_cutoff (float): cutoff radius to include partial charges.
+
+    Returns:
+        to_remove (list): atoms to be removed. 
+    """
+
+    def get_dist(coords1, coords2):
+        """Calculate the euclidean distance between two 3D points."""
+        return (
+            (coords1[0] - coords2[0]) ** 2 + 
+            (coords1[1] - coords2[1]) ** 2 + 
+            (coords1[2] - coords2[2]) ** 2
+        ) ** (1/2)
+
+    def get_coords(gro_data, atom_num):
+        """Retrieve the (x, y, z) coordinates for a given atom number."""
+        x = gro_data['x_coord'][gro_data["atomnum"].index(atom_num)]
+        y = gro_data['y_coord'][gro_data["atomnum"].index(atom_num)]
+        z = gro_data['z_coord'][gro_data["atomnum"].index(atom_num)]
+        return (x, y, z)
+
+    # Initialize the distances list
+    distances = []
+
+    # Get the atom numbers to be treated as point charges
+    non_qm = [i for i in gro_data.get("atomnum", []) if i not in qm_atoms]
+
+    # Loop over the point charges
+    for i in non_qm:
+        coords_ = get_coords(gro_data, i)
+
+        # Get the minimum distance with respect to the quantum atoms
+        min_dist = min(
+            get_dist(coords_, get_coords(gro_data, qm_atom)) for qm_atom in qm_atoms
+        )
+
+        # Store the atom and the distance (convert from nm to AA)
+        distances.append((i, min_dist*10))
+
+    # Sort point charges by distance (most distant first)
+    distances.sort(key=lambda x: x[1], reverse=True)
+
+    # Get a list with point charges outside the cutoff boundary (to be removed)
+    to_remove = [num for num, dist in distances if dist > embedding_cutoff]
+
+    # Get a list with point charges to be included
+    point_charges = [i[0] for i in distances if i[0] not in to_remove]
+
+    return to_remove, point_charges
+
+
 def write_gaussian_input(
     grofile: str,
     itpfile: str,
@@ -547,10 +605,13 @@ def write_gaussian_input(
     link_coords: list,
     n_neighbors: int,
     cutoff: float,
+    embedding_cutoff: float,
+    percentage_redist: float,
     keywords: str,
     charge: int,
     spin_mult: int,
     output: str,
+    checkpoint: bool,
     test: bool,
 ) -> None:
     """Write the Gaussian09/16 input file.
@@ -563,10 +624,13 @@ def write_gaussian_input(
         link_coords (list): list with link atoms coordinates.
         n_neighbors (int): number of closest neighbors to redistribute the charge.
         cutoff (float): cutoff radius to redistribute the charge.
+        embedding_cutoff (float): cutoff radius to include partial charges.
+        percentage_redist (float): percentage of point charges to redistribute the net charge.
         keywords (str): calculation keywords (e.g. HF/STO-3G Charge)
         charge (int): system's total charge.
         spin_mult (int): system's spin multiplicity.
         output (str): name of the output file.
+        checkpoint (bool): write checkpoint line in the header.
         test (bool): write point charges as bismuth atoms for visualization.
     """
 
@@ -577,21 +641,60 @@ def write_gaussian_input(
     qm_shift, neigh_nums, neigh_shifts = get_charge_shifts(
         grofile, 
         itpfile, 
-        qm_atoms, 
-        to_remove, 
+        qm_atoms,
+        to_remove,
         n_neighbors, 
         cutoff
     )
+    
+    # Apply a cutoff to the embedding
+    if embedding_cutoff is not None:
+        to_remove_embedding, point_charges = cut_embedding(
+            gro_data,
+            qm_atoms,
+            embedding_cutoff
+        )
+
+        if not test:
+            # Get the total charge of the partial charges atoms
+            pc_charge = 0.0
+            for j in point_charges:
+                # Get the atom and residue names of each point charge to be removed
+                atomname = gro_data["atomname"][gro_data["atomnum"].index(j)]
+                resname = gro_data["resname"][gro_data["atomnum"].index(j)]
+                itpAtomNum = gro_data["itpAtomNum"][gro_data["atomnum"].index(j)]
+
+                # Loop over the .itp files
+                for file in itpfile:
+                    charge = get_charge(file, atomname, resname, itpAtomNum)
+                    if charge:
+                        pc_charge += charge 
+                        break
+
+            # Get the point charges to redistribute the charges
+            pc_redist = point_charges[:round(len(point_charges) * percentage_redist)]
+
+            # Get the charge shift
+            redist_shift = pc_charge/len(pc_redist)
+    
+    else:
+        to_remove_embedding = []
 
     # Write the coordinates in the Gaussian input file
     with open(f"{output}", "w") as fout:
         if test:
-            # Write the amount of atoms for the .xyz file
-            fout.write(f"{len(gro_data['atomnum'])}\n\n")
+            if embedding_cutoff is not None:
+                # Write the amount of atoms for the .xyz file
+                fout.write(f"{len(qm_atoms)+len(point_charges)}\n\n")
+            else:
+                # Write the amount of atoms for the .xyz file
+                fout.write(f"{len(gro_data['atomnum'])}\n\n")
 
         else:
             # Write the header
-            fout.write(f"%chk={output.split('.')[0]}.chk \n")
+            if checkpoint:
+                fout.write(f"%chk={output.split('.')[0]}.chk \n")
+
             fout.write(f"#p {' '.join(keywords)} \n\n")
             fout.write(f"QM calculation with point charges \n\n")
             fout.write(f"{charge} {spin_mult}\n")
@@ -619,21 +722,29 @@ def write_gaussian_input(
         # Write the blank line required by Gaussian
         if not test:
             fout.write("\n")
-            
+
         # Write the remaining atoms as point charges
         for j in range(len(gro_data["resname"])):
             # Write the other atoms as point charges
             if (gro_data["atomnum"][j] not in qm_atoms
-                and gro_data["atomnum"][j] not in to_remove):
+                and gro_data["atomnum"][j] not in to_remove
+                and gro_data["atomnum"][j] not in to_remove_embedding):
 
                 # Get the charge
                 _charge = get_charge(itpfile, gro_data["atomname"][j], gro_data["resname"][j], gro_data["itpAtomNum"][j])
 
-                # Redistribute the charges to neutralize the system
+                # Redistribute the charge from removed atoms to the neighbors 
                 if gro_data["atomnum"][j] in neigh_nums:
-                    _charge += qm_shift + neigh_shifts[neigh_nums.index(gro_data["atomnum"][j])]
-                else:
+                    _charge += neigh_shifts[neigh_nums.index(gro_data["atomnum"][j])]
+
+                # Neutralize the system
+                if embedding_cutoff is None:
                     _charge += qm_shift
+
+                elif (embedding_cutoff is not None 
+                      and not test 
+                      and gro_data["atomnum"][j] in pc_redist):
+                    _charge -= redist_shift
 
                 # Boolean variable to check if partial charges are correctly placed
                 if test:
@@ -654,12 +765,20 @@ def write_gaussian_input(
         # Write the final blank line required by Gaussian
         fout.write("\n")
 
-    # Yield final messages
-    print(f"Gaussian input file '{output}' successfully created.\n")
-    if cutoff != 0.0:
-        print(f"Atoms {to_remove} were removed and the charges were redistributed over the point charges within a {cutoff} AA radius sphere.\n")
+    # Print final messages
+    if not test:
+        print(f"Gaussian input file '{output}' successfully created.\n")
+        if len(to_remove) != 0:
+            if cutoff != 0.0:
+                print(f"Atoms {to_remove} were removed and the charges were redistributed over the point charges within a {cutoff} AA radius sphere.\n")
+            else:
+                print(f"Atoms {to_remove} were removed and the charges were redistributed over the respective {n_neighbors} closest point charges.\n")
+
+        if embedding_cutoff is not None:
+            print(f"Charge of {pc_charge} was redistributed over the {percentage_redist*100}% most distant point charges " \
+              f"({round(len(point_charges) * percentage_redist)}) from the QM region.\n")
     else:
-        print(f"Atoms {to_remove} were removed and the charges were redistributed over the respective {n_neighbors} closest point charges.\n")
+        print(f"Gaussian input file '{output.split('.')[0]}.xyz' sucessfully created.\n")
 
 
 def get_distant_charge(file: str) -> float | str:
@@ -782,7 +901,7 @@ def check_total_charge(
         else:
             # Print a warning for big charges
             if total_charge > 0.1:
-                print("WARNING: Total charge is bigger than usual numerical fluctuations. " \
+                print("WARNING: Total charge is bigger than usual numerical fluctuations for neutral systems. " \
                       "Make sure that the charge is consistent with the expected total charge.\n")
 
             # Find the most distant charge (in average) to the molecule
@@ -828,12 +947,15 @@ def main() -> None:
     parser.add_argument("--resnums", "-rn", help="number of the residue(s) to be treated with QM. Default is 1.", nargs="+", type=int, default=[1])
     parser.add_argument("--link_scale_factor", "-sf", help="link atom distance scale factor. Default is 0.71.", type=float, default=0.71)
     parser.add_argument("--n_neighbors", "-nn", help="number of closest neighbors to redistribute the charge. Default is 3.", type=int, default=3)
-    parser.add_argument("--cutoff", "-cut", help="cutoff radius (in AA) to redistribute the charge.", type=float, default=0.0)
-    parser.add_argument("--keywords", "-k", help="Gaussian keywords for the calculation. Default is \"B3LYP/6-31G(d,p) Charge\".", nargs="+", type=str, default=["B3LYP/6-31G(d,p) Charge"])
+    parser.add_argument("--cutoff", "-cut", help="cutoff radius (in AA) to redistribute the charge from the removed atom.", type=float, default=0.0)
+    parser.add_argument("--embedding_cutoff", "-ec", help="cutoff distance (in AA) to include point charges. Default is to not use it.", type=float, default=None)
+    parser.add_argument("--percentage_redist", "-pr", help="percentage of distant point charges to redistribute the net charge from embedding cut. Default is 0.1 (i.e., 10%%).", type=float, default=0.1)
+    parser.add_argument("--keywords", "-k", help="Gaussian keywords for the calculation. Default is \"B3LYP/6-31G(d,p) Charge NoSymm\".", nargs="+", type=str, default=["B3LYP/6-31G(d,p) Charge NoSymm"])
     parser.add_argument("--charge", "-c", help="total charge of the system. Default is 0.", type=int, default=0)
     parser.add_argument("--spin_multiplicity", "-ms", help="spin multiplicity of the system. Default is 1.", type=int, default=1)
     parser.add_argument("--output", "-o", help="name of the output file. Default is \"calc.com\".", type=str, default="calc.com")
-    parser.add_argument("--test", help="If True, generates a .xyz file with partial charges as bismuth atoms for visualization.", action="store_true", default=False)
+    parser.add_argument("--checkpoint", "-chk", help="If True, add a line to save the checkpoint file during calculations.", action="store_true", default=False)
+    parser.add_argument("--test", help="If True, generates a .xyz file for visualization, with partial charges as bismuth atoms.", action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -884,10 +1006,13 @@ def main() -> None:
                         link_coords,
                         args.n_neighbors,
                         args.cutoff,
+                        args.embedding_cutoff,
+                        args.percentage_redist,
                         args.keywords, 
                         args.charge, 
                         args.spin_multiplicity, 
                         os.path.join('input_files', _name),
+                        args.checkpoint,
                         args.test,
                     )
 
@@ -924,10 +1049,13 @@ def main() -> None:
             link_coords,
             args.n_neighbors,
             args.cutoff,
+            args.embedding_cutoff,
+            args.percentage_redist,
             args.keywords, 
             args.charge, 
             args.spin_multiplicity, 
             args.output,
+            args.checkpoint,
             args.test,
         )
 
