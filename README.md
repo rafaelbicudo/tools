@@ -88,6 +88,48 @@ Creates an input file from `.gro` configurations to perform [ASEC](https://doi.o
 
 ### Usage
 ```
+$ python prep_asec.py -h
+usage: prep_asec.py [-h] [--grofile GROFILE] [--configs_dir CONFIGS_DIR] [--atomnums ATOMNUMS [ATOMNUMS ...]]
+                    [--residues RESIDUES [RESIDUES ...]] [--resnums RESNUMS [RESNUMS ...]]
+                    [--keywords KEYWORDS [KEYWORDS ...]] [--charge CHARGE] [--spin_multiplicity SPIN_MULTIPLICITY]
+                    [--output OUTPUT]
+                    itpfile [itpfile ...]
+
+Extract configurations from Gromos87 (.gro) files.
+
+positional arguments:
+  itpfile               topology file(s) (.itp) from GROMACS.
+
+options:
+  -h, --help            show this help message and exit
+  --grofile GROFILE, -gro GROFILE
+                        reference .gro configuration file.
+  --configs_dir CONFIGS_DIR, -dir CONFIGS_DIR
+                        path to the directory with .gro configurations.
+  --atomnums ATOMNUMS [ATOMNUMS ...], -an ATOMNUMS [ATOMNUMS ...]
+                        list of atom numbers treated with QM (e.g., 1-10 22 82-93).
+  --residues RESIDUES [RESIDUES ...], -res RESIDUES [RESIDUES ...]
+                        list of residues treated with QM.
+  --resnums RESNUMS [RESNUMS ...], -rn RESNUMS [RESNUMS ...]
+                        number of the residue(s) to be treated with QM. Default is 1.
+  --keywords KEYWORDS [KEYWORDS ...], -k KEYWORDS [KEYWORDS ...]
+                        Gaussian keywords for the calculation. Default is "B3LYP/6-31G(d,p) Charge".
+  --charge CHARGE, -c CHARGE
+                        total charge of the system. Default is 0.
+  --spin_multiplicity SPIN_MULTIPLICITY, -ms SPIN_MULTIPLICITY
+                        spin multiplicity of the system. Default is 1.
+  --output OUTPUT, -o OUTPUT
+                        name of the output file. Default is "asec.com".
+```
+
+## prep_qmmm.py
+Create Gaussian09/16 input files to run calculations according to the s-QM/MM method. Molecules from the quantum region are saturated according to the [H link-atom approach](https://doi.org/10.1002/anie.200802019).
+
+### Dependencies
+* [Python](https://scikit-learn.org/stable/index.html) >=3.10
+
+### Usage
+```
 $ python prep_qmmm.py -h
 usage: prep_qmmm.py [-h] [--grofile GROFILE] [--configs_dir CONFIGS_DIR] [--atomnums ATOMNUMS [ATOMNUMS ...]]
                     [--residues RESIDUES [RESIDUES ...]] [--resnums RESNUMS [RESNUMS ...]]
@@ -135,51 +177,4 @@ options:
                         name of the output file. Default is "calc.com".
   --checkpoint, -chk    If True, add a line to save the checkpoint file during calculations.
   --test                If True, generates a .xyz file for visualization, with partial charges as bismuth atoms.
-```
-
-## prep_qmmm.py
-Create Gaussian09/16 input files to run calculations according to the s-QM/MM method. Molecules from the quantum region are saturated according to the [H link-atom approach](https://doi.org/10.1002/anie.200802019).
-
-### Dependencies
-* [Python](https://scikit-learn.org/stable/index.html) >=3.10
-
-### Usage
-```
-$ prep_qmmm.py [-h] [--grofile GROFILE] [--configs_dir CONFIGS_DIR] [--atomnums ATOMNUMS [ATOMNUMS ...]] [--residues RESIDUES [RESIDUES ...]] [--resnums RESNUMS [RESNUMS ...]]
-                    [--link_scale_factor LINK_SCALE_FACTOR] [--n_neighbors N_NEIGHBORS] [--cutoff CUTOFF] [--keywords KEYWORDS [KEYWORDS ...]] [--charge CHARGE]
-                    [--spin_multiplicity SPIN_MULTIPLICITY] [--output OUTPUT] [--test]
-                    itpfile [itpfile ...]
-
-Extract configurations from Gromos87 (.gro) files.
-
-positional arguments:
-  itpfile               topology file(s) (.itp) from GROMACS.
-
-options:
-  -h, --help            show this help message and exit
-  --grofile GROFILE, -gro GROFILE
-                        reference .gro configuration file.
-  --configs_dir CONFIGS_DIR, -dir CONFIGS_DIR
-                        path to the directory with .gro configurations.
-  --atomnums ATOMNUMS [ATOMNUMS ...], -an ATOMNUMS [ATOMNUMS ...]
-                        list of atom numbers treated with QM (e.g. 1-10 22 82-93).
-  --residues RESIDUES [RESIDUES ...], -res RESIDUES [RESIDUES ...]
-                        list of residues treated with QM.
-  --resnums RESNUMS [RESNUMS ...], -rn RESNUMS [RESNUMS ...]
-                        number of the residue(s) to be treated with QM. Default is 1.
-  --link_scale_factor LINK_SCALE_FACTOR, -sf LINK_SCALE_FACTOR
-                        link atom distance scale factor. Default is 0.71.
-  --n_neighbors N_NEIGHBORS, -nn N_NEIGHBORS
-                        number of closest neighbors to redistribute the charge. Default is 3.
-  --cutoff CUTOFF, -cut CUTOFF
-                        cutoff radius (in AA) to redistribute the charge.
-  --keywords KEYWORDS [KEYWORDS ...], -k KEYWORDS [KEYWORDS ...]
-                        Gaussian keywords for the calculation. Default is "B3LYP/6-31G(d,p) Charge".
-  --charge CHARGE, -c CHARGE
-                        total charge of the system. Default is 0.
-  --spin_multiplicity SPIN_MULTIPLICITY, -ms SPIN_MULTIPLICITY
-                        spin multiplicity of the system. Default is 1.
-  --output OUTPUT, -o OUTPUT
-                        name of the output file. Default is "calc.com".
-  --test                If True, generates a .xyz file with partial charges as bismuth atoms for visualization.
 ```

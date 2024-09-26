@@ -4,11 +4,11 @@ This tutorial is dedicated to run the `fit_dihedral.py` script. Before following
 
 ## Ryckaert-Bellemans dihedral
 
-As developed by [William L. Jorgensen et al.](https://doi.org/10.1021%2Fja00214a001), the OPLS-AA force field describes the proper torsional interaction according to the Ryckaert-Bellemans dihedral. For each proper torsional angle, the 4-atom energy is given by,
+As developed by [William L. Jorgensen et al.](https://doi.org/10.1021%2Fja00214a001), the OPLS-AA force field describes the proper torsional interaction according to the Ryckaert-Bellemans dihedral. For each proper torsional angle the energy is given by,
 
 $$E_{RB}=\sum_{n=1}^6C_n[\cos{(\phi+\delta_n)}]^n\equiv\frac{1}{2}\sum_{n=1}^4F_n[1+(-1)^{n+1}\cos{(n\phi+\delta_n)}] \ .$$
 
-Both forms are equivalent, but the additional flexibility from the 6 coefficients ($C_n$) had a better performance in comparison to the 4 coefficients ($F_n$) in the Fourier form. Therefore, the `fit_dihedral.py` considers the full expression with 6 coefficients and all $\delta_n$ phases are set to zero as frequently done.
+Both forms are equivalent, but during our tests the additional flexibility with 6 coefficients ($C_n$) had a better performance in comparison to 4 coefficients ($F_n$) in the Fourier form. Therefore, the `fit_dihedral.py` considers the full expression with 6 coefficients and all $\delta_n$ phases are set to zero as frequently done.
 
 ## Initial setup with DICEtools
 
