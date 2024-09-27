@@ -3,7 +3,6 @@ Collection of scripts for preparing, running and analyzing quantum chemistry sim
 
 Tutorial 1: [Fitting proper torsional constants for OPLS-AA force field](https://github.com/rafaelbicudo/tools/blob/main/tutorials/fit_dihedral.md)  
 Tutorial 2: [Generating Gaussian input for QM/MM calculations](https://github.com/rafaelbicudo/tools/blob/main/tutorials/prep_qmmm.md)  
-Tutorial 3: Generating Gaussian input for ASEC calculations  
 
 ## fit_dihedral.py
 
