@@ -937,7 +937,7 @@ def check_total_charge(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract configurations from Gromos87 (.gro) files.")
+    parser = argparse.ArgumentParser(description="Generates input file for QM/MM calculations using Gaussian.")
     
     parser.add_argument("itpfile", help="topology file(s) (.itp) from GROMACS.", nargs="+", type=str, default=[])
     parser.add_argument("--grofile", "-gro", help="reference .gro configuration file.", type=str)

@@ -68,7 +68,7 @@ Extract excited state properties from Gaussian09/16 output file and export them 
 $ python get_excited-states.py -h
 usage: get_excited-states.py [-h] [-dir DIR] [-log LOGFILE [LOGFILE ...]] [-csv CSVFILE]
 
-Extract configurations from Gromos87 (.gro) files.
+Extract excited state data from Gaussian output files.
 
 options:
   -h, --help            show this help message and exit
