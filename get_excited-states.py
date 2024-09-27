@@ -121,7 +121,7 @@ def export_csv(logfile: str, csvfile: str) -> None:
             
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract configurations from Gromos87 (.gro) files.")
+    parser = argparse.ArgumentParser(description="Extract excited state data from Gaussian output files.")
     
     parser.add_argument("-dir", help="Directory with Gaussian09/16 output files.")
     parser.add_argument("-log", "--logfile", help="Gaussian09/16 output file.", nargs="+", type=str)
