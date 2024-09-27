@@ -138,7 +138,7 @@ usage: prep_qmmm.py [-h] [--grofile GROFILE] [--configs_dir CONFIGS_DIR] [--atom
                     [--output OUTPUT] [--checkpoint] [--test]
                     itpfile [itpfile ...]
 
-Extract configurations from Gromos87 (.gro) files.
+Generates input file for QM/MM calculations using Gaussian.
 
 positional arguments:
   itpfile               topology file(s) (.itp) from GROMACS.
