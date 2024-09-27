@@ -1022,6 +1022,10 @@ def main() -> None:
                         args.test
                     )
 
+                    # Change the file format to .xyz
+                    if args.test:
+                        os.rename(args.output, f"{args.output[:-4]}.xyz")
+
         else:
             print(f"Could not access '{args.configs_dir}' directory.")
 
@@ -1059,7 +1063,11 @@ def main() -> None:
             args.test,
         )
 
-        check_total_charge(args.output, args.configs_dir, args.test)
+        check_total_charge(
+            args.output, 
+            args.configs_dir, 
+            args.test
+        )
 
         # Change the file format to .xyz
         if args.test:

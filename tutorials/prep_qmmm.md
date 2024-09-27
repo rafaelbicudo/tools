@@ -136,7 +136,7 @@ $ ls
 benzene.itp box.gro     ethanol.itp    water.itp
 ```
 
-Instead of including all other atoms as point charges, we can set a cutoff radius using the `-ec` flag and redistribute the charge among the percentage of most distant atoms set by the flag `-pc` (values between 0.0 and 1.0). 
+Instead of including all other atoms as point charges, we can set a cutoff radius using the `-ec` flag and redistribute the charge among the percentage of most distant atoms set by the flag `-pc` (values between 0.0 and 1.0). Let's consider the quantum region as the 2 benzenes molecules with resid 1 and 2:
 
 ```
 $ python $tools/prep_qmmm.py benzene.itp water.itp ethanol.itp -res UNK -rn 1 2 -k "B3LYP/STO-3G Charge NoSymm" -gro box.gro -ec 10
