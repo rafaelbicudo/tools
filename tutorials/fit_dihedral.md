@@ -18,13 +18,13 @@ Our example will illustrate the procedure for fitting the torsional constants of
 
 ## Initial setup with DICEtools
 
-The first part is adapted from [DICEtools tutorial](files/tutorial_dice.pdf) (unfortunately only in portuguese). From the topology and configuration files in the `.itp`, `.gro` and `.pdb` formats, we start by generating the input files for DICE. If the topology file was generated using external tools, _e.g._, by [LigParGen](https://traken.chem.yale.edu/ligpargen/) or [PolyParGen](http://polypargen.com), we start by running the `reorder_ligpargen.py` to avoid having different ordering of atoms among the 3 files.
+The first part is adapted from [DICEtools tutorial](files/tutorial_dice.pdf) (unfortunately only in portuguese). From the topology and configuration files in the `.itp`, `.gro` and `.pdb` formats, we start by generating the input files for DICE. If the topology file was generated using external tools, _e.g._, by [LigParGen](https://traken.chem.yale.edu/ligpargen/) or [PolyParGen](http://polypargen.com), one should run the `reorder_ligpargen.py` script to avoid having different ordering of atoms among the files.
 
 ```
 $ python $dicetools/reorder_ligpargen.py trimer_org.pdb trimer_org.gro trimer_org.itp
 ```
 
-The script will generate two new files, _i.e._, `reordered_trimer_org.gro` and `reorder_trimer_org.itp`, which should be used for generating the DICE input files. In our case, we also want to correct the partial charges in the topology file, which can be done by running:
+The script will generate two new files, _i.e._, `reordered_trimer_org.gro` and `reorder_trimer_org.itp`, which should be used from now on. In our case, we also want to change partial charges in the topology file, which can be done by running:
 
 ```
 $python $dicetools/parse_gaussian_charges.py reordered_trimer_org.itp tri_chelpg_org.log -m chelpg
@@ -69,7 +69,7 @@ P(Qx8O-T) trimer optimization with n-Octanol solvent
 
 **_PS:_** One can also add the `--gaussbot` flag to include a footer in the input files, _e.g._, to provide custom solvent variables.  
 
-Moreover, the `--printxyz` flag generates a `.xyz` file with each configuration, being a requirement for the further fit using `fit_dihedral.py`. Finally, the code yields energies and dipole moment for each configuration, which is stored in `plot_eff_tors.out` file, and generates several files with the `tors_30-29-52-61_*` format:
+Moreover, the `--printxyz` flag generates a `.xyz` file with each configuration, being a requirement for the further fit using `fit_dihedral.py`. Finally, the code yields energies and dipole moment for each configuration (which are stored in `plot_eff_tors.out` file) and generates several files with the `tors_30-29-52-61_*` format:
 
 ```
 $ ls
@@ -117,20 +117,18 @@ $ diff LR_parsed_reordered_trimer_org.itp parsed_reordered_trimer_org.itp
 >    50    52    29    30   3	6.234	0.000	-6.234	-0.000	-0.000	0.000
 ```
 
-The extremely high coefficients come from the high correlation between the variables. Since all the dihedrals share at least two of the 4 atoms, they all change accordingly.  
-
-To deal with it, we can introduce a penalization term that considers the module of each coefficient into the minimization function. For example, in the case of Ridge regression, one seeks to minimize,
+The extremely high coefficients come from the high correlation between the variables. Since all the dihedrals share at least two of the 4 atoms, they all change accordingly. To deal with it, we can introduce a penalization term that considers the module of each coefficient into the minimization function. For example, in the case of Ridge regression, one seeks to minimize,
 
 $$\mathcal{L}=\frac{||y - Xw||^2_2}{2N}  + \alpha ||w||_1 \ ,$$
 
-where $N$ is the number of samples, $||\cdot||_1$ is the 1-norm, $||\cdot||_2$ the euclidean norm and $\alpha$ the penalization coefficient. By adding the `-m lassocv` flag, one can use [scikit-learn](https://scikit-learn.org/stable/) implementation of Lasso regression with cross validation to optimize the fitting procedure:
+where $N$ is the number of samples, $w$ the coefficient matrix, $||\cdot||_1$ is the 1-norm, $||\cdot||_2$ the euclidean norm and $\alpha$ the penalization coefficient. By adding the `-m lassocv` flag, one can use [scikit-learn](https://scikit-learn.org/stable/) implementation of Lasso regression with cross validation to optimize the fitting procedure:
 
 ```
 $ python $dicetools/fit_dihedral.py tors_30-29-52-61_scan.log tors_30-29-52-61_rotations.xyz parsed_reordered_trimer_org.itp reordered_trimer_org.txt reordered_trimer_org.dfr 30 29 52 61 36 -m lassocv
 Optimal penalty coefficient from Lasso CV regression: 0.02657179281914719
 ```
 
-As a result, the new coefficient become smaller and feasible for running calculations:
+As a result, the new coefficients become smaller and feasible for running calculations:
 
 ```
 $ diff LR_parsed_reordered_trimer_org.itp parsed_reordered_trimer_org.itp
