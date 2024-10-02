@@ -123,7 +123,7 @@ To deal with it, we can introduce a penalization term that considers the module 
 
 $$\mathcal{L}=\frac{||y - Xw||^2_2}{2N}  + \alpha ||w||_1 \ ,$$
 
-where $N$ is the number of samples, $\|\cdot\|_1$ is the 1-norm, $\|\cdot\|_2$ the euclidean norm and $\alpha$ the penalization coefficient. By adding the `-m lassocv` flag, one can use [scikit-learn](https://scikit-learn.org/stable/) implementation of Lasso regression with cross validation to optimize the fitting procedure:
+where $N$ is the number of samples, $||\cdot||_1$ is the 1-norm, $||\cdot||_2$ the euclidean norm and $\alpha$ the penalization coefficient. By adding the `-m lassocv` flag, one can use [scikit-learn](https://scikit-learn.org/stable/) implementation of Lasso regression with cross validation to optimize the fitting procedure:
 
 ```
 $ python $dicetools/fit_dihedral.py tors_30-29-52-61_scan.log tors_30-29-52-61_rotations.xyz parsed_reordered_trimer_org.itp reordered_trimer_org.txt reordered_trimer_org.dfr 30 29 52 61 36 -m lassocv
