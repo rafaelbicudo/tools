@@ -14,11 +14,11 @@ For this example we are going to consider [PTQ10](https://www.ossila.com/product
 
 ![tors_angles](images/tors_angles.png)
 
-Our example will illustrate the procedure for fitting the torsional constants of the dihedral highlighted in cyan, but it's the same for any other dihedral, only changing the atom indexes.
+Our example will illustrate the procedure for fitting the torsional constants of the dihedral highlighted in cyan, but it's the same for any other dihedral, only changing the atom indexes. Note that the other 3 dihedrals that share the same two central atoms with the cyan dihedral are also adjusted during the procedure, _i.e._, the fitting procedure includes 24 constants.
 
 ## Initial setup with DICEtools
 
-The first part is adapted from [DICEtools tutorial](files/tutorial_dice.pdf) (unfortunately only in portuguese). From the topology and configuration files in the `.itp`, `.gro` and `.pdb` formats, we start by generating the input files for DICE. If the topology file was generated using external tools, _e.g._, by [LigParGen](https://traken.chem.yale.edu/ligpargen/) or [PolyParGen](http://polypargen.com), one should run the `reorder_ligpargen.py` script to avoid having different ordering of atoms among the files.
+The first part is adapted from [DICEtools tutorial](files/tutorial_dice.pdf) (unfortunately only in portuguese). With the topology and configuration files in the `.itp`, `.gro` and `.pdb` formats, we start by generating the input files for DICE. If the topology file was generated using external tools, _e.g._, by [LigParGen](https://traken.chem.yale.edu/ligpargen/) or [PolyParGen](http://polypargen.com), one should run the `reorder_ligpargen.py` script to avoid having different ordering of atoms among the files.
 
 ```
 $ python $dicetools/reorder_ligpargen.py trimer_org.pdb trimer_org.gro trimer_org.itp
@@ -47,13 +47,13 @@ $ python $dicetools/gromacs2dice.py parsed_reordered_trimer_org.itp reordered_tr
 The files reordered_trimer_org.txt and reordered_trimer_org.dfr were successfully generated.
 ```
 
-It is crucial to add the `-g` and `-c` flags because they will ensure that bonds and angles are extracted from the files provided, instead of using default OPLS-AA values. Furthermore, the `--flexible-fragments` will write additional data to run simulations with flexible molecules. With the DICE input files, we can generate the input for running the rigid torsional scan (with Gaussian) using the `plot_eff_tors.py` script:
+It is crucial to add the `-g` and `-c` flags because they will ensure that bonds and angles are extracted from the files provided, instead of using default OPLS-AA values. Furthermore, the `--flexible-fragments` flag will write additional data to run simulations with flexible molecules. With the DICE input files, we can generate the Gaussian input file for running the rigid torsional scan using the `plot_eff_tors.py` script:
 
 ```
 $ python $dicetools/plot_eff_tors.py reordered_trimer_org.txt reordered_trimer_org.dfr 30 29 52 61 36 --gausstop top_g16.txt >> plot_eff_tors.out
 ```
 
-In addition to the `.txt` and `.dfr` files created by the previous command, one need to specify 4 atom indexes that define the dihedral angle. For the cyan angle, such atoms are indexed as `30`, `29`, `52` and `61` (this order was extracted from the proper dihedrals in the `.itp` file, but is not a requirement). The next number, `36` (`npoints`), corresponds to the amount of configurations included in the scan, such that the angle variation (in degrees) between two subsequent configurations is $\varphi=360/\text{npoints}$. The header of the Gaussian input file with the calculation details is written in the `top_g16.txt`:
+In addition to the `.txt` and `.dfr` files, created by the previous command, one need to specify 4 atom indexes that define the dihedral angle. For the cyan angle, such atoms are indexed as `30`, `29`, `52` and `61` (this order was extracted from the proper dihedrals in the `.itp` file, but is not a requirement). The next number, `36` (`npoints`), corresponds to the amount of configurations included in the scan, such that the angle variation between two subsequent configurations is $\varphi=360/\text{npoints}$ (in degrees). The header of the Gaussian input file with the calculation details is also a requirement, and in this case is written in the `top_g16.txt`:
 
 ```
 $ cat top_g16.txt
@@ -93,7 +93,7 @@ By default, the code will run an ordinary linear regression using the least-squa
 
 ![lr1](images/linear_regression1.png)
 
-Even though the dihedral energy is well fitted (bottom panel), the total energy end up presenting several non-physical fluctuations (top panel). Additionally, when checking the fitted coefficients we can easily identify a **multicollinearity** problem:
+Even though the dihedral energy is well fitted (bottom panel), the total energy end up presenting several undesired fluctuations (top panel). Additionally, when checking the fitted coefficients we can easily identify a **multicollinearity** problem:
 
 ```
 $ diff LR_parsed_reordered_trimer_org.itp parsed_reordered_trimer_org.itp
@@ -117,7 +117,7 @@ $ diff LR_parsed_reordered_trimer_org.itp parsed_reordered_trimer_org.itp
 >    50    52    29    30   3	6.234	0.000	-6.234	-0.000	-0.000	0.000
 ```
 
-The extremely high coefficients come from the high correlation between the variables. Since all the dihedrals share at least two of the 4 atoms, they all change accordingly. To deal with it, we can introduce a penalization term that considers the module of each coefficient into the minimization function. For example, in the case of Ridge regression, one seeks to minimize,
+The extremely large coefficients come from the high correlation between the variables. Since all the dihedrals share at least two of the 4 atoms, they all change accordingly. To deal with it, we can introduce a penalization term that considers the module of each coefficient into the minimization function. For example, in the case of Ridge regression, one seeks to minimize,
 
 $$\mathcal{L}=\frac{||y - Xw||^2_2}{2N}  + \alpha ||w||_1 \ ,$$
 
@@ -152,7 +152,7 @@ $ diff LR_parsed_reordered_trimer_org.itp parsed_reordered_trimer_org.itp
 >    50    52    29    30   3	6.234	0.000	-6.234	-0.000	-0.000	0.000
 ```
 
-However, the fitting is still not sufficiently accurate, specially for the describing the minimum energy points:
+However, the fitting is still not sufficiently accurate, specially for describing the minimum energy points:
 
 ![lr2](images/linear_regression2.png)
 
