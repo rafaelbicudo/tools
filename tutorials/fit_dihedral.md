@@ -50,7 +50,7 @@ The files reordered_trimer_org.txt and reordered_trimer_org.dfr were successfull
 It is crucial to add the `-g` and `-c` flags because they will ensure that bonds and angles are extracted from the files provided, instead of using default OPLS-AA values. Furthermore, the `--flexible-fragments` flag will write additional data to run simulations with flexible molecules. With the DICE input files, we can generate the Gaussian input file for running the rigid torsional scan using the `plot_eff_tors.py` script:
 
 ```
-$ python $dicetools/plot_eff_tors.py reordered_trimer_org.txt reordered_trimer_org.dfr 30 29 52 61 36 --gausstop top_g16.txt >> plot_eff_tors.out
+$ python $dicetools/plot_eff_tors.py reordered_trimer_org.txt reordered_trimer_org.dfr 30 29 52 61 36 --gausstop top_g16.txt --printxyz >> plot_eff_tors.out
 ```
 
 In addition to the `.txt` and `.dfr` files, created by the previous command, one need to specify 4 atom indexes that define the dihedral angle. For the cyan angle, such atoms are indexed as `30`, `29`, `52` and `61` (this order was extracted from the proper dihedrals in the `.itp` file, but is not a requirement). The next number, `36` (`npoints`), corresponds to the amount of configurations included in the scan, such that the angle variation between two subsequent configurations is $\varphi=360/\text{npoints}$ (in degrees). The header of the Gaussian input file with the calculation details is also a requirement, and in this case is written in the `top_g16.txt`:
