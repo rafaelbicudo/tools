@@ -53,7 +53,11 @@ It is crucial to add the `-g` and `-c` flags because they will ensure that bonds
 $ python $dicetools/plot_eff_tors.py reordered_trimer_org.txt reordered_trimer_org.dfr 30 29 52 61 36 --gausstop top_g16.txt >> plot_eff_tors.out
 ```
 
-In addition to the `.txt` and `.dfr` files, created by the previous command, one need to specify 4 atom indexes that define the dihedral angle. For the cyan angle, such atoms are indexed as `30`, `29`, `52` and `61` (this order was extracted from the proper dihedrals in the `.itp` file, but is not a requirement). The next number, `36` (`npoints`), corresponds to the amount of configurations included in the scan, such that the angle variation between two subsequent configurations is $\varphi=360/\text{npoints}$ (in degrees). The header of the Gaussian input file with the calculation details is also a requirement, and in this case is written in the `top_g16.txt`:
+In addition to the `.txt` and `.dfr` files, created by the previous command, one need to specify 4 atom indexes that define the dihedral angle. For the cyan angle, such atoms are indexed as `30`, `29`, `52` and `61` (this order was extracted from the proper dihedrals in the `.itp` file, but is not a requirement). The next number, `36` (`npoints`), corresponds to the amount of configurations included in the scan, such that the angle variation between two subsequent configurations is $\varphi=360/\text{npoints}$ (in degrees).  
+
+**_PS:_** We recommend using `jmol` or other visualization tool to get the correct atom indexes of the desirable dihedral.  
+
+The header of the Gaussian input file with the calculation details is also a requirement, and in this case is written in the `top_g16.txt`:
 
 ```
 $ cat top_g16.txt
