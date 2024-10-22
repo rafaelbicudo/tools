@@ -608,7 +608,7 @@ def write_gaussian_input(
     embedding_cutoff: float,
     percentage_redist: float,
     keywords: str,
-    charge: int,
+    tot_charge: int,
     spin_mult: int,
     output: str,
     checkpoint: bool,
@@ -627,7 +627,7 @@ def write_gaussian_input(
         embedding_cutoff (float): cutoff radius to include partial charges.
         percentage_redist (float): percentage of point charges to redistribute the net charge.
         keywords (str): calculation keywords (e.g. HF/STO-3G Charge)
-        charge (int): system's total charge.
+        tot_charge (int): system's total charge.
         spin_mult (int): system's spin multiplicity.
         output (str): name of the output file.
         checkpoint (bool): write checkpoint line in the header.
@@ -697,7 +697,7 @@ def write_gaussian_input(
 
             fout.write(f"#p {' '.join(keywords)} \n\n")
             fout.write(f"QM calculation with point charges \n\n")
-            fout.write(f"{charge} {spin_mult}\n")
+            fout.write(f"{tot_charge} {spin_mult}\n")
 
         # Write the QM atoms
         for j in range(len(gro_data["resname"])):
