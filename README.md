@@ -177,3 +177,58 @@ options:
   --checkpoint, -chk    If True, add a line to save the checkpoint file during calculations.
   --test                If True, generates a .xyz file for visualization, with partial charges as bismuth atoms.
 ```
+
+## get_g16_opt_configs.py
+Extract the transient configurations that were considered during a geometry optimization using Gaussian09/16.
+
+### Dependencies
+* [Python](https://scikit-learn.org/stable/index.html) >= 3.9
+
+### Usage
+```
+$ python get_g16_opt_configs.py -h
+usage: get_g16_opt_configs.py [-h] [-o OUTPUT] file
+
+Get transient configurations from geometry optimization using Gaussian.
+
+positional arguments:
+  file                  Gaussian optimization output file.
+
+options:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        Name of the file with transient configurations. Default is opt_configs.xyz.
+```
+
+## make_interface.py
+Duplicate a given molecule to create an interface. It was developed to create idealized aggregation types, _e.g._, H- and J-type.
+
+### Dependencies
+* [Python](https://scikit-learn.org/stable/index.html) >= 3.9
+* [numpy](https://numpy.org)
+* [MDAnalysis](https://www.mdanalysis.org)
+* [sklearn](https://scikit-learn.org/stable/index.html)
+* [scipy](https://scipy.org)
+
+### Usage
+```
+$ python make_interface.py -h
+usage: make_interface.py [-h] [-t TYPE] [-d DISTANCE] [-o OUTPUT] [-s SHEAR] [-rot ROT_ANGLE] file
+
+Create interface between molecules.
+
+positional arguments:
+  file                  File with configuration parsed by MDAnalysis.
+
+options:
+  -h, --help            show this help message and exit
+  -t TYPE, --type TYPE  Type of aggregation, i.e., H-, X-, T- or J-type. Default is H.
+  -d DISTANCE, --distance DISTANCE
+                        Distance between molecules. Default is 3 Angstrom.
+  -o OUTPUT, --output OUTPUT
+                        Name and format of the output file. Default is stacked_file.pdb.
+  -s SHEAR, --shear SHEAR
+                        Shear distance to shift the molecule for J-type aggregation. Default is 1.5 Angstrom.
+  -rot ROT_ANGLE, --rot_angle ROT_ANGLE
+                        Rotation angle for the X- or T-type aggregation. Default is 90 degrees.
+```
