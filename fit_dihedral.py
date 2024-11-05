@@ -23,6 +23,7 @@ DATE: DEZ/2022
 import argparse
 import numpy as np
 import os
+import sys
 
 from plot_en_angle_gaussian_scan import parse_en_log_gaussian
 from plot_eff_tors import get_phi, get_potential_curve
@@ -490,7 +491,18 @@ def write_itp_file(topfile: str, lr_data: dict):
 			line = f.readline()
 
 
-def linear_regression(scan: str, scan_fit: str, dih_fit: str, topfile: str, method: str, lasso_alpha: float, weight_minimums: float, fit_from_total: bool) -> None:
+def linear_regression(
+	scan: str, 
+	scan_fit: str, 
+	dih_fit: str, 
+	topfile: str, 
+	method: str, 
+	lasso_alpha: float, 
+	weight_minimums: float, 
+	fit_from_total: bool,
+	etot_limits: tuple = None,
+	edih_limits: tuple = None
+) -> None:
 	"""
 	Perform the linear regression, generate a plot with classical and "quantum" torsional energies
 	and change the C_i coefficients in the topology file.
@@ -504,6 +516,8 @@ def linear_regression(scan: str, scan_fit: str, dih_fit: str, topfile: str, meth
 	method [type: str] - the method used in the linear regression (least-square, ridge or lasso)
 	weight_minima [type: list] - the weights atributted to the total energy minimum points
 	fit_from_total [type: bool] - fit the dihedral from total energy
+	etot_limits [type: tuple] - tuple with lower and upper limits of the total energy plot.
+	edih_limits [type: tuple] - tuple with lower and upper limits of the dihedral energy plot.
 
 	OUTPUT:
 	The "linear_regression.png" and "LR_*.itp" files.
@@ -535,9 +549,6 @@ def linear_regression(scan: str, scan_fit: str, dih_fit: str, topfile: str, meth
 
 	X = df.drop(columns=["y"])
 	y = df["y"]
-
-	# print('X.shape: ', X.shape)
-	# print('y.shape: ', y.shape)
 
 	# Apply the weight for total energy minimum points
 	weights = np.array([])
@@ -585,8 +596,6 @@ def linear_regression(scan: str, scan_fit: str, dih_fit: str, topfile: str, meth
 	# Write the linear regression coefficients in the topology file
 	write_itp_file(topfile, lr_data)
 
-	# Plot the results
-
 	# Fitted dihedral energy
 	y_plot = np.dot(X.values, reg.coef_)
 
@@ -607,6 +616,7 @@ def linear_regression(scan: str, scan_fit: str, dih_fit: str, topfile: str, meth
 	smooth_qmE = interp1d(x_full, scan['E_qm - enqm_0 (kcal/mol)'].copy(), kind='cubic')
 	smooth_qmDih = interp1d(x_full, scan['U_tors-qm (kcal/mol)'].copy(), kind='cubic')
 
+	# Plot the results
 	fig, ((ax1), (ax2)) = plt.subplots(ncols=1, nrows=2, figsize=(7, 5))
 
 	# Total energy
@@ -626,7 +636,11 @@ def linear_regression(scan: str, scan_fit: str, dih_fit: str, topfile: str, meth
 	# Plot setup
 	ax1.set_ylabel('Energy (kcal/mol)')
 	ax1.legend(frameon=False)
-	# ax1.set_ylim(-0.3, 2.3)
+	
+	if etot_limits:
+		ax1.set_ylim(etot_limits[0], etot_limits[1])
+	if edih_limits:
+		ax2.set_ylim(edih_limits[0], edih_limits[1])
 
 	ax2.set_xlabel(r'Angle ($^o$)')
 	ax2.set_ylabel('Energy (kcal/mol)')
@@ -657,6 +671,8 @@ if __name__ == '__main__':
 	parser.add_argument("--max-barrier", "-b", help="limit the torsional barriers to the provided value (in kcal/mol).", default=None)
 	parser.add_argument("--fit-from-total", "-t", help="fit the torsional angle using the total energy.", action='store_true', default=False)
 	parser.add_argument("--angles", nargs='+', type=float, help="all dihedrals (in degrees) to be used in the fit (include the max and min angles).")
+	parser.add_argument("--etot_limits", nargs=2, type=float, help="lower and upper limits of the total energy plot.", default=None)
+	parser.add_argument("--edih_limits", nargs=2, type=float, help="lower and upper limits of the dihedral energy plot.", default=None)
 
 	args = parser.parse_args()
 
@@ -671,5 +687,15 @@ if __name__ == '__main__':
 
 	scan_fit, scan = rescale_data(data, args.angles, args.max_barrier)
 
-	# linear_regression(scan, scan_fit, dih, dih_fit, args.topfile, args.method, args.alpha, args.weight, args.fit_from_total)
-	linear_regression(scan, scan_fit, dih_fit, args.topfile, args.method, args.alpha, args.weight, args.fit_from_total)
+	linear_regression(
+		scan, 
+		scan_fit, 
+		dih_fit, 
+		args.topfile, 
+		args.method, 
+		args.alpha, 
+		args.weight, 
+		args.fit_from_total,
+		args.etot_limits,
+		args.edih_limits
+	)
