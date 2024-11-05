@@ -22,9 +22,10 @@ Performs a linear regression to determine Ryckaert-Bellemans torsional coefficie
 ### Usage
 ```
 $ python fit_dihedral.py -h
-usage: fit_dihedral.py [-h] [--method METHOD] [--alpha ALPHA] [--weight WEIGHT] [--cutoff CUTOFF] [--remove-overlap] [--max-barrier MAX_BARRIER] [--fit-from-total]
-                       [--angles ANGLES [ANGLES ...]]
-                       gaussianlogfile xyzrotationsfile topfile txtfile dfrfile a1 a2 a3 a4 npoints
+usage: fit_dihedral2.py [-h] [--method METHOD] [--alpha ALPHA] [--weight WEIGHT] [--cutoff CUTOFF] [--remove-overlap]
+                        [--max-barrier MAX_BARRIER] [--fit-from-total] [--angles ANGLES [ANGLES ...]]
+                        [--etot_limits ETOT_LIMITS ETOT_LIMITS] [--edih_limits EDIH_LIMITS EDIH_LIMITS]
+                        gaussianlogfile xyzrotationsfile topfile txtfile dfrfile a1 a2 a3 a4 npoints
 
 Performs a linear regression to determine torsional dihedral coefficients.
 
@@ -55,6 +56,10 @@ options:
   --fit-from-total, -t  fit the torsional angle using the total energy.
   --angles ANGLES [ANGLES ...]
                         all dihedrals (in degrees) to be used in the fit (include the max and min angles).
+  --etot_limits ETOT_LIMITS ETOT_LIMITS
+                        lower and upper limits of the total energy plot.
+  --edih_limits EDIH_LIMITS EDIH_LIMITS
+                        lower and upper limits of the dihedral energy plot.
 ```
 
 ## get_excited-states.py
