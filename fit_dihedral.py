@@ -649,6 +649,8 @@ def linear_regression(
 	plt.tight_layout()
 	plt.savefig("linear_regression.png", bbox_inches='tight', format='png', dpi=600)
 
+	print("Regression successfully performed!\n")
+	print("Total and torsional energy profiles are shown in the \'linear_regression.png\' file.")
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description="Performs a linear regression to determine torsional dihedral coefficients.")
