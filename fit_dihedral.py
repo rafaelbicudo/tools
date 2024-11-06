@@ -637,6 +637,7 @@ def linear_regression(
 	ax1.set_ylabel('Energy (kcal/mol)')
 	ax1.legend(frameon=False)
 	
+	# Set limits if desirable
 	if etot_limits:
 		ax1.set_ylim(etot_limits[0], etot_limits[1])
 	if edih_limits:
