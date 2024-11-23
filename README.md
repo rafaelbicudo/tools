@@ -237,3 +237,31 @@ options:
   -rot ROT_ANGLE, --rot_angle ROT_ANGLE
                         Rotation angle for the X- or T-type aggregation. Default is 90 degrees.
 ```
+
+## prep_glass_trans.py
+Create input files for running GROMACS simulations at different temperatures to determine the glass transition temperature.
+
+### Usage
+```
+$ python prep_glass_trans.py -h
+usage: prep_glass_trans.py [-h] [-T0 INITIAL_TEMPERATURE] [-Tf FINAL_TEMPERATURE] [-dT TEMPERATURE_INTERVAL]
+                           [-sub SUBMISSION_FILE]
+                           gro_file top_file
+
+Prepare GROMACS input files for the simulations required to determine the glass transition temperature.
+
+positional arguments:
+  gro_file              the .gro input file.
+  top_file              the .top topology file.
+
+options:
+  -h, --help            show this help message and exit
+  -T0 INITIAL_TEMPERATURE, --initial_temperature INITIAL_TEMPERATURE
+                        the initial temperature (in Celsius). Default is 20.
+  -Tf FINAL_TEMPERATURE, --final_temperature FINAL_TEMPERATURE
+                        the final temperature (in Celsius). Default is 280.
+  -dT TEMPERATURE_INTERVAL, --temperature_interval TEMPERATURE_INTERVAL
+                        the temperature interval between simulations (in Celsius). Default is 5.
+  -sub SUBMISSION_FILE, --submission_file SUBMISSION_FILE
+                        file with the header of the submission file. Default is sub.txt.
+```
