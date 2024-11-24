@@ -241,6 +241,10 @@ options:
 ## prep_glass_trans.py
 Create input files for running GROMACS simulations at different temperatures to determine the glass transition temperature.
 
+### Dependencies
+* [Python](https://scikit-learn.org/stable/index.html) >= 3.9
+* [numpy](https://numpy.org)
+
 ### Usage
 ```
 $ python prep_glass_trans.py -h
@@ -264,4 +268,47 @@ options:
                         the temperature interval between simulations (in Celsius). Default is 5.
   -sub SUBMISSION_FILE, --submission_file SUBMISSION_FILE
                         file with the header of the submission file. Default is sub.txt.
+```
+
+## get_glass_trans.py
+Determine the glass transition temperature from the output of the simulations prepared with `prep_glass_trans.py`.
+
+### Dependencies
+* [Python](https://scikit-learn.org/stable/index.html) >= 3.9
+* [numpy](https://numpy.org)
+* [pandas](https://pandas.pydata.org)
+* [scipy](https://scipy.org)
+* [matplotlib](https://matplotlib.org)
+
+### Usage
+```
+$ python get_glass_trans.py -h
+usage: get_glass_trans.py [-h] [-dirs DIRECTORIES [DIRECTORIES ...]] [-i VOLUME_INDEX] [-s] [-vd VOLUME_DATA]
+                          [-pref DIRECTORY_PREFFIX] [-lT LOW_TEMPERATURES] [-hT HIGH_TEMPERATURES] [-dT TEMPERATURE_INTERVAL]
+                          [-t_min MINIMUM_TEMPERATURE] [-t_max MAXIMUM_TEMPERATURE]
+
+Determine the glass temperature transition from GROMACS output files.
+
+options:
+  -h, --help            show this help message and exit
+  -dirs DIRECTORIES [DIRECTORIES ...], --directories DIRECTORIES [DIRECTORIES ...]
+                        the directories for the independent sets of simulation. Used for more than 1 set of simulations. Default
+                        is [].
+  -i VOLUME_INDEX, --volume_index VOLUME_INDEX
+                        the index for volume when running 'gmx energy'. Default is 22.
+  -s, --save_data       If True, saves the volume data in the .csv format. Default is True.
+  -vd VOLUME_DATA, --volume_data VOLUME_DATA
+                        the volume data .csv file name (e.g., vol_data.csv). Default is None.
+  -pref DIRECTORY_PREFFIX, --directory_preffix DIRECTORY_PREFFIX
+                        the preffix of the temperature directories. Default is 'temp'.
+  -lT LOW_TEMPERATURES, --low_temperatures LOW_TEMPERATURES
+                        list with low temperature values to be included in the fitting. Default is 20-70.
+  -hT HIGH_TEMPERATURES, --high_temperatures HIGH_TEMPERATURES
+                        interval of high temperature values to be included in the fitting. Default is 230-280.
+  -dT TEMPERATURE_INTERVAL, --temperature_interval TEMPERATURE_INTERVAL
+                        the temperature interval between simulations (in Celsius). Default is 5.
+  -t_min MINIMUM_TEMPERATURE, --minimum_temperature MINIMUM_TEMPERATURE
+                        the minimum temperature for plotting (in Celsius). Default is 0.
+  -t_max MAXIMUM_TEMPERATURE, --maximum_temperature MAXIMUM_TEMPERATURE
+                        the maximum temperature for plotting (in Celsius). Default is 300.
 ```
