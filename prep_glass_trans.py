@@ -157,7 +157,7 @@ class SimulationManager:
         # Loop over the files
         for file in os.listdir(os.getcwd()):
 
-            # Change the reference temperature of 
+            # Change the reference temperature in the .mdp file 
             if file.endswith('mdp'):
                 with open(file, "r") as f:
                     lines = f.readlines()
@@ -168,10 +168,10 @@ class SimulationManager:
 
                 # Loop over the files
                 for line in lines:
-                    # Change the reference temperature
+                    # Change the reference temperature (in Kelvin)
                     if "ref_t" in line:
                         new_lines.append(f";{line.strip()}\n")
-                        new_lines.append(f"ref_t \t\t\t= {t}\n")
+                        new_lines.append(f"ref_t \t\t\t= {t+273}\n")
                         found_ref_t = True
                     else:
                         new_lines.append(line)
