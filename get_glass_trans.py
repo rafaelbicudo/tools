@@ -229,6 +229,7 @@ class SimulationManager:
 
         # Loop over all independent set directories
         for dir in self.options.dirs:
+            print(f"Working on directory: {dir}")
             # Loop over the files
             for i in os.listdir(dir):
                 # Check only for the temperature directories
