@@ -229,7 +229,7 @@ class SimulationManager:
 
         # Loop over all independent set directories
         for dir in self.options.dirs:
-            print(f"Working on directory: {dir}")
+            print(f"Reading data from directory: {dir}")
             # Loop over the files
             for i in os.listdir(dir):
                 # Check only for the temperature directories
@@ -326,7 +326,7 @@ class SimulationManager:
         sigma_temp = np.sqrt(
             (lin_low_err / (ang_low - ang_high))**2 +
             (lin_high_err / (ang_low - ang_high))**2 +
-            ((ang_high - ang_low) * ang_low_err / (ang_low - ang_high)**2)**2 +
+            ((lin_high - lin_low) * ang_low_err / (ang_low - ang_high)**2)**2 +
             ((lin_high - lin_low) * ang_high_err / (ang_low - ang_high)**2)**2
         )
 
@@ -356,7 +356,7 @@ class SimulationManager:
         ax.scatter(glass_temp, ang_low * glass_temp + lin_low, marker='X', color='black', zorder=3, s=100)
         ax.axvline(glass_temp, 0, ang_low * glass_temp + lin_low, linestyle='--', color='black')
 
-        ax.set_xlabel(r'Temperature ($^\text{o}$C)', fontsize=12)
+        ax.set_xlabel(r'Temperature ($\rm ^o$C)', fontsize=12)
         ax.set_ylabel(r'Volume (nm$^3$)', fontsize=12)
         ax.legend(loc='upper left', frameon=False, fontsize=12)
         ax.minorticks_on()
@@ -364,6 +364,8 @@ class SimulationManager:
         ax.grid(which='both', linestyle=':', linewidth=0.5, alpha=0.75)
         
         plt.tight_layout()
+        plt.savefig('glass_temp_fit.pdf', format='pdf', dpi=600)
+        plt.savefig('glass_temp_fit.png', format='png', dpi=600)
         plt.show()
 
 
