@@ -399,7 +399,7 @@ class SimulationManager:
 
         ax.set_xlabel(r'Temperature ($\rm ^o$C)', fontsize=12)
         ax.set_ylabel(rf"{avg_df['prop'][0]} (${avg_df['unit'][0]}$)", fontsize=12)
-        ax.legend(loc='upper left', frameon=False, fontsize=12)
+        ax.legend(loc='upper center', frameon=False, fontsize=12)
         ax.minorticks_on()
         ax.tick_params(labelsize=12, width=1.25)
         ax.grid(which='both', linestyle=':', linewidth=0.5, alpha=0.75)
