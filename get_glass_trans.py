@@ -34,6 +34,8 @@ class Options:
     temp_int: float = None
     t_min: float = None
     t_max: float = None
+    t0: int = None
+    tf: int = None
 
     # Functions
     def update(self, new: dict) -> None:
@@ -75,7 +77,9 @@ def parse_args(args: argparse.Namespace) -> Options:
         "high_temps": args.high_temperatures,
         "temp_int": args.temperature_interval,
         "t_min": args.minimum_temperature,
-        "t_max": args.maximum_temperature
+        "t_max": args.maximum_temperature,
+        "t0": args.initial_time,
+        "tf": args.final_time
     }
 
     return Options(**options_dict)
@@ -152,18 +156,32 @@ def configure_run(args_in: List[str]) -> Options:
         default = 5.0
     )
     parser.add_argument(
-        "-t_min",
+        "-T_min",
         "--minimum_temperature",
         type = float,
         help = "the minimum temperature for plotting (in Celsius). Default is 0.",
         default = 0.0
     )
     parser.add_argument(
-        "-t_max",
+        "-T_max",
         "--maximum_temperature",
         type = float,
         help = "the maximum temperature for plotting (in Celsius). Default is 300.",
         default = 300.0
+    )
+    parser.add_argument(
+        "-t0",
+        "--initial_time",
+        type = int,
+        help = "the initial time (in ps) to compute the average volume. Default is 500.",
+        default = 500
+    )
+    parser.add_argument(
+        "-tf",
+        "--final_time",
+        type = int,
+        help = "the final time (in ps) to compute the average volume. Default is 1000.",
+        default = 1000
     )
 
     args = parser.parse_args(args_in)
@@ -183,7 +201,7 @@ class SimulationManager:
         try:
             # Run the gmx energy command
             result = sp.run(
-                f"gmx energy -f {os.path.join(dir, temp_dir, file)}",
+                f"gmx energy -f {os.path.join(dir, temp_dir, file)} -b {self.options.t0} -e {self.options.tf}",
                 input = str(self.options.vol_index), 
                 text = True,            # Ensure input/output is treated as text
                 capture_output = True,  # Capture the output of the command
