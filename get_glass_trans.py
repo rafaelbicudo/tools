@@ -25,9 +25,9 @@ class Options:
 
     # Class attributes
     dirs : str = None
-    vol_index: int = None
+    index: int = None
     save_df: bool = None
-    vol_df: str = None
+    df: str = None
     pref: str = None
     low_temps: list = None
     high_temps: list = None
@@ -69,9 +69,9 @@ def parse_args(args: argparse.Namespace) -> Options:
 
     options_dict = {
         "dirs": args.directories,
-        "vol_index": args.volume_index,
+        "index": args.property_index,
         "save_df": args.save_data,
-        "vol_df": args.volume_data,
+        "df": args.property_data,
         "pref": args.directory_preffix + '_',
         "low_temps": args.low_temperatures,
         "high_temps": args.high_temperatures,
@@ -108,23 +108,23 @@ def configure_run(args_in: List[str]) -> Options:
     )
     parser.add_argument(
         "-i",
-        "--volume_index",
+        "--property_index",
         type = int,
-        help = "the index for volume when running 'gmx energy'. Default is 22.",
+        help = "the index for the property to be considered when running 'gmx energy'. Default is 22.",
         default = 22
     )
     parser.add_argument(
         "-s",
         "--save_data",
         action = "store_true",
-        help = "If True, saves the volume data in the .csv format. Default is True.",
+        help = "If True, saves the data in the .csv format. Default is True.",
         default = True
     )
     parser.add_argument(
-        "-vd",
-        "--volume_data",
+        "-pd",
+        "--property_data",
         type = str,
-        help = "the volume data .csv file name (e.g., vol_data.csv). Default is None.",
+        help = "the property data .csv file name (e.g., vol_data.csv). Default is None.",
         default = None
     )
     parser.add_argument(
@@ -173,14 +173,14 @@ def configure_run(args_in: List[str]) -> Options:
         "-t0",
         "--initial_time",
         type = int,
-        help = "the initial time (in ps) to compute the average volume. Default is 500.",
+        help = "the initial time (in ps) to compute the average property. Default is 500.",
         default = 500
     )
     parser.add_argument(
         "-tf",
         "--final_time",
         type = int,
-        help = "the final time (in ps) to compute the average volume. Default is 1000.",
+        help = "the final time (in ps) to compute the average property. Default is 1000.",
         default = 1000
     )
 
@@ -196,13 +196,13 @@ class SimulationManager:
     options: Options
 
     def run_gmx_energy(self, dir, temp_dir, file):
-        """Run gmx energy to get the volume data."""
+        """Run gmx energy to get the property data."""
 
         try:
             # Run the gmx energy command
             result = sp.run(
                 f"gmx energy -f {os.path.join(dir, temp_dir, file)} -b {self.options.t0} -e {self.options.tf}",
-                input = str(self.options.vol_index), 
+                input = str(self.options.index), 
                 text = True,            # Ensure input/output is treated as text
                 capture_output = True,  # Capture the output of the command
                 check = True,           # Raise an error if the command fails
@@ -212,37 +212,58 @@ class SimulationManager:
             # Remove the output file
             sp.run("rm energy.xvg", shell=True)
 
-            # Find the average value in the output
-            for line in result.stdout.splitlines():
-                if "Volume" in line:
-                    # Split the summary line
-                    words = line.split()
+            # Get the data from the output
+            last_line = result.stdout.splitlines()[-1]
+
+            # Split the line into words
+            words = last_line.split()
+
+            # Create the data dict
+            dict_ = {
+                'dir': [temp_dir],
+                'path': [os.path.join(dir, temp_dir)],
+                'prop': [words[0]],
+                'unit': [words[-1][1:-1]], 
+                'avg': [float(words[1])],
+                'error': [float(words[2])],
+                'rmsd': [float(words[3])]
+            }
+
+            return dict_
+
+            # # Find the average value in the output
+            # for line in result.stdout.splitlines():
+            #     if "Volume" in line:
+            #         # Split the summary line
+            #         words = line.split()
                     
-                    # Create the a data dict
-                    dict_ = {
-                        'dir': [temp_dir],
-                        'path': [os.path.join(dir, temp_dir)],
-                        'avg_volume': [float(words[1])],
-                        'error': [float(words[2])],
-                        'rmsd': [float(words[3])]
-                    }
+            #         # Create the a data dict
+            #         dict_ = {
+            #             'dir': [temp_dir],
+            #             'path': [os.path.join(dir, temp_dir)],
+            #             'avg': [float(words[1])],
+            #             'error': [float(words[2])],
+            #             'rmsd': [float(words[3])]
+            #         }
                 
-                    return dict_
+            #         return dict_
 
         except sp.CalledProcessError as e:
             print("Error occurred while running gmx energy:", e)
 
-    def get_volumes(self):
-        """Determine the volumes."""
+    def get_data(self):
+        """Determine the property."""
 
         # Initialize a pandas DataFrame
         df = pd.DataFrame({
             'dir': [],
             'path': [],
-            'avg_volume': [],       # in nm^3
-            'error': [],            # in nm^3
-            'rmsd': [],             # in nm^3
-            'temp': []              # in Celsius
+            'prop': [],             # the property name
+            'unit': [],             # the property unit
+            'avg': [],              # the average property
+            'error': [],            # the error
+            'rmsd': [],             # the rmsd
+            'temp': []              # the temperature in Celsius
         })
 
         # Loop over all independent set directories
@@ -257,18 +278,18 @@ class SimulationManager:
                         # Find the energy file
                         if j.endswith('.edr'):
                             # Get the data dictionary
-                            vol_dict = self.run_gmx_energy(dir, i, j)
+                            dict = self.run_gmx_energy(dir, i, j)
 
                             # Add the temperature to the dictionary
-                            vol_dict['temp'] = float(i.split('_')[-1])
+                            dict['temp'] = float(i.split('_')[-1])
 
                             # Add the whole data to the DataFrame
-                            df = pd.concat([df, pd.DataFrame(vol_dict)], ignore_index=True)
+                            df = pd.concat([df, pd.DataFrame(dict)], ignore_index=True)
 
         # Export the data as a .csv file
         if self.options.save_df:
-            df.to_csv('vol_data.csv', index=False)
-            print("Data exported in the 'vol_data.csv' file.\n")
+            df.to_csv('data.csv', index=False)
+            print("Data exported in the 'data.csv' file.\n")
 
         return df
 
@@ -280,8 +301,8 @@ class SimulationManager:
             return a * x + b
 
         # Initialize the arrays
-        vols = []
-        vol_errs = []
+        props = []
+        errs = []
         temps = []
 
         # Loop over the temperatures
@@ -297,15 +318,15 @@ class SimulationManager:
 
                     # Append the data for fitting
                     temps.append(t)
-                    vols.append(row['avg_volume'].values[0])
-                    vol_errs.append(row['error'].values[0])
+                    props.append(row['avg'].values[0])
+                    errs.append(row['error'].values[0])
                     
         # Fit a linear model
         popt, pcov = curve_fit(
             linear_model, 
             temps, 
-            vols, 
-            sigma = vol_errs, 
+            props, 
+            sigma = errs, 
             absolute_sigma = True
         )
 
@@ -319,14 +340,16 @@ class SimulationManager:
     def run(self):
         """Run the code."""
 
-        # Get the volume data
-        if self.options.vol_df:
-            df = pd.read_csv(self.options.vol_df)
+        # Get the data
+        if self.options.df:
+            df = pd.read_csv(self.options.df)
         else:
-            df = self.get_volumes()
+            df = self.get_data()
 
-        # Group by temperature, drop 'path' and 'dir', and calculate the mean for other columns
-        avg_df = df.drop(columns=['path', 'dir']).groupby('temp', as_index=False).mean()
+        # Group by 'temp', aggregate numerical columns with mean and keep first value of 'prop' and 'unit'
+        avg_df = (df.drop(columns=['path', 'dir'])
+                    .groupby('temp', as_index=False)
+                    .agg({col: 'mean' if df[col].dtype != 'object' else 'first' for col in df.columns if col not in ['path', 'dir']}))
 
         # Fit straight lines for low and high temperatures
         ang_low, lin_low, ang_low_err, lin_low_err = self.fit_line(self.options.low_temps, avg_df)
@@ -356,7 +379,7 @@ class SimulationManager:
         x = np.linspace(self.options.t_min, self.options.t_max, 1500)
 
         # Plot all points with error bars
-        ax.errorbar(avg_df['temp'], avg_df['avg_volume'], yerr=avg_df['error'], fmt='o', capsize=5, color='black', alpha=0.5)
+        ax.errorbar(avg_df['temp'], avg_df['avg'], yerr=avg_df['error'], fmt='o', capsize=5, color='black', alpha=0.5)
 
         # Get the y_values
         y_low = ang_low * x + lin_low
@@ -375,7 +398,7 @@ class SimulationManager:
         ax.axvline(glass_temp, 0, ang_low * glass_temp + lin_low, linestyle='--', color='black')
 
         ax.set_xlabel(r'Temperature ($\rm ^o$C)', fontsize=12)
-        ax.set_ylabel(r'Volume (nm$^3$)', fontsize=12)
+        ax.set_ylabel(rf'{avg_df['prop'][0]} (${avg_df['unit'][0]}$)', fontsize=12)
         ax.legend(loc='upper left', frameon=False, fontsize=12)
         ax.minorticks_on()
         ax.tick_params(labelsize=12, width=1.25)
