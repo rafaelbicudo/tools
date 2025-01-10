@@ -231,23 +231,6 @@ class SimulationManager:
 
             return dict_
 
-            # # Find the average value in the output
-            # for line in result.stdout.splitlines():
-            #     if "Volume" in line:
-            #         # Split the summary line
-            #         words = line.split()
-                    
-            #         # Create the a data dict
-            #         dict_ = {
-            #             'dir': [temp_dir],
-            #             'path': [os.path.join(dir, temp_dir)],
-            #             'avg': [float(words[1])],
-            #             'error': [float(words[2])],
-            #             'rmsd': [float(words[3])]
-            #         }
-                
-            #         return dict_
-
         except sp.CalledProcessError as e:
             print("Error occurred while running gmx energy:", e)
 

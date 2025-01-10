@@ -312,3 +312,45 @@ options:
   -t_max MAXIMUM_TEMPERATURE, --maximum_temperature MAXIMUM_TEMPERATURE
                         the maximum temperature for plotting (in Celsius). Default is 300.
 ```
+
+## get_closest_mols.py
+Extract snapshots from GROMACS simulations with a given atom group centered and the closest molecules to it, and export it to a .xyz file.
+
+### Dependencies
+* [Python](https://scikit-learn.org/stable/index.html) >= 3.9
+* [numpy](https://numpy.org)
+* [MDAnalysis](https://www.mdanalysis.org)
+
+### Usage
+```
+$ python get_closest_mols.py -h
+usage: get_closest_mols.py [-h] [-s TOPOLOGY_FILE] [-f TRAJECTORY_FILE] [-ref REFERENCE]
+                           [-cref CLOSEST_MOLS_REFERENCE] [-n N_CLOSEST] [-init INITIAL_FRAME]
+                           [-end FINAL_FRAME] [-n_frames NUMBER_OF_FRAMES] [-cm_to_origin] [-o OUTPUT_FILE]
+
+Get closest molecules to a given reference from GROMACS output.
+
+options:
+  -h, --help            show this help message and exit
+  -s TOPOLOGY_FILE, --topology_file TOPOLOGY_FILE
+                        GROMACS structure+mass(db) file (.tpr, .gro, .g96, .pdb, .brk or .ent). Default is 'topol.tpr'.
+  -f TRAJECTORY_FILE, --trajectory_file TRAJECTORY_FILE
+                        GROMACS trajectory file (.xtc, .trr, .cpt, .gro, .g96, .pdb or .tng). Default is 'traj.xtc'.
+  -ref REFERENCE, --reference REFERENCE
+                        Atom selection language (same used in VMD) for the reference group. Default is 'resname UNK'.
+  -cref CLOSEST_MOLS_REFERENCE, --closest_mols_reference CLOSEST_MOLS_REFERENCE
+                        Atom selection language (same used in VMD) for the closest atoms. Default is 'not resname UNK'.
+  -n N_CLOSEST, --n_closest N_CLOSEST
+                        Number of closest molecules to be included. Default is 1.
+  -init INITIAL_FRAME, --initial_frame INITIAL_FRAME
+                        Initial frame. Default is 1.
+  -end FINAL_FRAME, --final_frame FINAL_FRAME
+                        Final frame. Default is -1 (last frame).
+  -n_frames NUMBER_OF_FRAMES, --number_of_frames NUMBER_OF_FRAMES
+                        Number of frames to be considered. Default is 100.
+  -cm_to_origin, --center_of_mass_to_origin
+                        If True, translates the center of mass of the reference molecule to the origin. Default is False.
+  -o OUTPUT_FILE, --output_file OUTPUT_FILE
+                        Output file name. Default is 'output.xyz'.
+```
+
