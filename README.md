@@ -354,3 +354,35 @@ options:
                         Output file name. Default is 'output.xyz'.
 ```
 
+### get_contacts.py
+
+Compute the number of contacts between two AtomGroups from MDAnalysis.
+
+### Dependencies
+* [Python](https://scikit-learn.org/stable/index.html) >= 3.9
+* [numpy](https://numpy.org)
+* [pandas](https://pandas.pydata.org)
+* [MDAnalysis](https://www.mdanalysis.org)
+
+### Usage
+```
+$ python get_contacts.py -h
+usage: get_contacts.py [-h] -g1 GROUP1 -g2 GROUP2 [-r RADIUS] [-o OUTPUT] topfile trajfile
+
+Compute the number of contacts for molecules with backbone and side chains structures.
+
+positional arguments:
+  topfile               GROMACS topology/structure file path (e.g., .tpr or .gro).
+  trajfile              GROMACS trajectory file path (e.g. .xtc or .trr).
+
+options:
+  -h, --help            show this help message and exit
+  -g1 GROUP1, --group1 GROUP1
+                        Atom selection language of Group 1.
+  -g2 GROUP2, --group2 GROUP2
+                        Atom selection language of Group 2.
+  -r RADIUS, --radius RADIUS
+                        Cutoff radius (in Angstrom) for contacts. Default is 4.5.
+  -o OUTPUT, --output OUTPUT
+                        Output file name. Default is 'contacts.csv'.
+```

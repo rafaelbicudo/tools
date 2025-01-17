@@ -3,8 +3,8 @@
 """Script to generate .xyz trajectory files with the closest 
    molecules to a given reference from GROMACS output.
 
-    AUTHOR: Rafael Bicudo Ribeiro (@rafaelbicudo)
-    DATE: 01/2025
+   AUTHOR: Rafael Bicudo Ribeiro (@rafaelbicudo)
+   DATE: 01/2024
 """
 
 import MDAnalysis as mda
