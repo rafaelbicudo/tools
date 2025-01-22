@@ -37,7 +37,7 @@ def get_contacts(u, group_a, group_b, radius=4.5, same_group=False):
 
 def main() -> None:
     
-    parser = argparse.ArgumentParser(description="Compute the number of contacts between two AtomGroups.")
+    parser = argparse.ArgumentParser(description="Compute the number of contacts for molecules with backbone and side chains structures.")
     parser.add_argument("topfile", help="GROMACS topology/structure file path (e.g., .tpr or .gro).", type=str)
     parser.add_argument("trajfile", help="GROMACS trajectory file path (e.g. .xtc or .trr).", type=str)
     parser.add_argument("-g1", "--group1", help="Atom selection language of Group 1.", type=str, required=True)
@@ -50,17 +50,25 @@ def main() -> None:
     # Create the universe
     u = mda.Universe(args.topfile, args.trajfile)
 
+    # # Check for identical groups
+    # if args.group1 == args.group2:
+    #     same_group=True
+
+    #     print("Warning: Group 1 and Group 2 are identical. Computing contacts within the same group.")
+    # else:
+    #     same_group=False
+
+    # Create the AtomGroups
+    g1 = u.select_atoms(args.group1)
+    g2 = u.select_atoms(args.group2)
+
     # Check for identical groups
-    if args.group1 == args.group2:
+    if g1 == g2:
         same_group=True
 
         print("Warning: Group 1 and Group 2 are identical. Computing contacts within the same group.")
     else:
         same_group=False
-
-    # Create the AtomGroups
-    g1 = u.select_atoms(args.group1)
-    g2 = u.select_atoms(args.group2)
 
     # Compute the contacts
     conts = get_contacts(u, g1, g2, radius=args.radius, same_group=same_group)
