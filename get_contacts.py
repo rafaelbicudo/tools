@@ -50,14 +50,6 @@ def main() -> None:
     # Create the universe
     u = mda.Universe(args.topfile, args.trajfile)
 
-    # # Check for identical groups
-    # if args.group1 == args.group2:
-    #     same_group=True
-
-    #     print("Warning: Group 1 and Group 2 are identical. Computing contacts within the same group.")
-    # else:
-    #     same_group=False
-
     # Create the AtomGroups
     g1 = u.select_atoms(args.group1)
     g2 = u.select_atoms(args.group2)
